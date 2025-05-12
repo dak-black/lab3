@@ -57,8 +57,6 @@ constant C_S00_AXI_ADDR_WIDTH : integer := 4;
 
 ----------------------------------------------------------------------------------
 -- AXI signals
-signal S_AXI_ACLK                     :  std_logic;
-signal S_AXI_ARESETN                  :  std_logic;
 signal S_AXI_AWADDR                   :  std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0);
 signal S_AXI_AWVALID                  :  std_logic;
 signal S_AXI_WDATA                    :  std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
@@ -460,7 +458,7 @@ port map (
     S_AXI_BREADY <= '0';
     loop
         wait until enable_send = '1';
-        wait until S_AXI_ACLK= '0';
+        wait until clk= '0';
             S_AXI_AWVALID <= '1';
             S_AXI_WVALID <= '1';
         wait until (S_AXI_AWREADY and S_AXI_WREADY) = '1';  --Client ready to read address/data        
@@ -486,7 +484,7 @@ BEGIN
     S_AXI_RREADY <= '0';
     loop
         wait until enable_read = '1';
-        wait until S_AXI_ACLK= '0';
+        wait until clk= '0';
             S_AXI_ARVALID <= '1';
             S_AXI_RREADY <= '1';
         wait until (S_AXI_RVALID and S_AXI_ARREADY) = '1';  --Client provided data
@@ -520,17 +518,17 @@ stimulus : PROCESS
  BEGIN
     fir_sel <= "000";
     -- Initialize, reset
-    S_AXI_ARESETN <= '0';
+    reset_n <= '0';
     enable_send <= '0';
     enable_read <= '0';
     data_select <= (others => '0');
     axi_data_write <= (others => '0');
-    axi_reg <= 0;           -- we are writing to AXI register 0
+    axi_reg <= 3;           -- we are writing to AXI register 0
     
-    wait for 15 ns;
-    S_AXI_ARESETN <= '1';
+    wait for 4000 ns;
+    reset_n <= '1';
     
-    wait until rising_edge(S_AXI_ACLK);
+    wait until rising_edge(clk);
     wait for CLOCK_PERIOD;
     
     
@@ -543,7 +541,10 @@ stimulus : PROCESS
     
     
     -- read data written to register 0
-   -- master_read_axi_reg(S_AXI_ARADDR, enable_read, axi_reg, S_AXI_RVALID);
+    master_read_axi_reg(S_AXI_ARADDR, enable_read, axi_reg, S_AXI_RVALID);
+    
+    
+    
     wait for 100 ns;
     
     -- write data to register 1
