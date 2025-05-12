@@ -132,6 +132,18 @@ component axis_transmitter
 		);
 end component;
 
+component fir_for_sim is
+  Port ( 
+    aclk : in STD_LOGIC;
+    s_axis_data_tvalid : in STD_LOGIC;
+    s_axis_data_tready : out STD_LOGIC;
+    s_axis_data_tdata : in STD_LOGIC_VECTOR ( 23 downto 0 );
+    m_axis_data_tvalid : out STD_LOGIC;
+    m_axis_data_tready : in STD_LOGIC;
+    m_axis_data_tdata : out STD_LOGIC_VECTOR ( 23 downto 0 )
+  );
+end component;
+
 component fir_lpf_0
   port (
     aclk : IN STD_LOGIC;
@@ -237,7 +249,7 @@ hpf_l_inst : fir_hpf_0
     m_axis_data_tdata => data_hpf_r_o
   );
   
-  bpf_l_inst : fir_bpf_0
+  bpf_l_inst : fir_for_sim
   port map (
     aclk => s00_axis_aclk,
     s_axis_data_tvalid => lr_valid_i,

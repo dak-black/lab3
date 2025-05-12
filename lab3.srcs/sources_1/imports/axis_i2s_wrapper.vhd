@@ -18,7 +18,8 @@ entity axis_i2s_wrapper is
 		-- Parameters of Axi Stream Bus Interface S00_AXIS, M00_AXIS
 		C_AXI_STREAM_DATA_WIDTH	: integer	:= 32;
 		AC_DATA_WIDTH : integer := 24;
-		PHASE_DATA_WIDTH :  integer := 12
+		PHASE_DATA_WIDTH :  integer := 12;
+		C_S00_AXI_ADDR_WIDTH	: integer	:= 4
 	);
     Port ( 
         ----------------------------------------------------------------------------
@@ -31,7 +32,6 @@ entity axis_i2s_wrapper is
 		ac_mute_en_i : in STD_LOGIC;
 		dds_reset_i : in STD_LOGIC;
 		dds_enable_i  : in STD_LOGIC;
-		dds_freq_sel_i : in STD_LOGIC_VECTOR(2 downto 0);
 
 		-- Audio Codec I2S controls
         ac_bclk_o : out STD_LOGIC;
@@ -43,7 +43,7 @@ entity axis_i2s_wrapper is
         ac_dac_lrclk_o : out STD_LOGIC;
         
         -- Audio Codec ADC (audio in)
-        ac_adc_data_i : in STD_LOGIC;
+--        ac_adc_data_i : in STD_LOGIC;
         ac_adc_lrclk_o : out STD_LOGIC;
         
         ----------------------------------------------------------------------------
@@ -67,6 +67,29 @@ entity axis_i2s_wrapper is
 		m00_axis_tlast    : out std_logic;
 		m00_axis_tready   : in std_logic;
 		
+		-- AXI lite
+		s00_axi_aclk	: in std_logic;
+		s00_axi_aresetn	: in std_logic;
+		s00_axi_awaddr	: in std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0);
+		s00_axi_awprot	: in std_logic_vector(2 downto 0);
+		s00_axi_awvalid	: in std_logic;
+		s00_axi_awready	: out std_logic;
+		s00_axi_wdata	: in std_logic_vector(C_AXI_STREAM_DATA_WIDTH-1 downto 0);
+		s00_axi_wstrb	: in std_logic_vector((C_AXI_STREAM_DATA_WIDTH/8)-1 downto 0);
+		s00_axi_wvalid	: in std_logic;
+		s00_axi_wready	: out std_logic;
+		s00_axi_bresp	: out std_logic_vector(1 downto 0);
+		s00_axi_bvalid	: out std_logic;
+		s00_axi_bready	: in std_logic;
+		s00_axi_araddr	: in std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0);
+		s00_axi_arprot	: in std_logic_vector(2 downto 0);
+		s00_axi_arvalid	: in std_logic;
+		s00_axi_arready	: out std_logic;
+		s00_axi_rdata	: out std_logic_vector(C_AXI_STREAM_DATA_WIDTH-1 downto 0);
+		s00_axi_rresp	: out std_logic_vector(1 downto 0);
+		s00_axi_rvalid	: out std_logic;
+		s00_axi_rready	: in std_logic;
+		
 		-- Debug ports (ILA)
 		dbg_left_audio_rx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 		dbg_left_audio_tx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
@@ -85,6 +108,7 @@ signal bclk : std_logic := '0';
 signal lrclk: std_logic := '0';
 signal left_rx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal right_rx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+
 signal left_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal right_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 
@@ -94,6 +118,8 @@ signal phase_inc_right : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
 signal left_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal right_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 
+signal left_phase_inc_debug : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+signal right_phase_inc_debug : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
 -- Debug ports (ILA)
 
 ----------------------------------------------------------------------------
@@ -165,6 +191,65 @@ component dds_controller is
       phase_inc_i   : in std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
       
       data_o        : out std_logic_vector(DDS_DATA_WIDTH-1 downto 0)); 
+end component;
+
+----------------------------------------------------------------------------------
+-- AXI DDS
+component axi_dds is
+	generic (
+	    ----------------------------------------------------------------------------
+		-- Users to add parameters here
+		DDS_DATA_WIDTH : integer := 24;         -- DDS data width
+        DDS_PHASE_DATA_WIDTH : integer := 12;   -- DDS phase increment data width
+        ----------------------------------------------------------------------------
+
+		-- User parameters ends
+		-- Do not modify the parameters beyond this line
+
+		-- Parameters of Axi Slave Bus Interface S00_AXI
+		C_S00_AXI_DATA_WIDTH	: integer	:= 32;
+		C_S00_AXI_ADDR_WIDTH	: integer	:= 4
+	);
+	port (
+	    ----------------------------------------------------------------------------
+		-- Users to add ports here
+		dds_clk_i     : in std_logic;
+		dds_enable_i  : in std_logic;
+		dds_reset_i   : in std_logic;
+		left_dds_data_o    : out std_logic_vector(DDS_DATA_WIDTH-1 downto 0);
+		right_dds_data_o    : out std_logic_vector(DDS_DATA_WIDTH-1 downto 0);
+		
+		-- Debug ports to send to ILA
+		left_dds_phase_inc_dbg_o : out std_logic_vector(DDS_PHASE_DATA_WIDTH-1 downto 0);   
+		right_dds_phase_inc_dbg_o : out std_logic_vector(DDS_PHASE_DATA_WIDTH-1 downto 0);   
+		
+		----------------------------------------------------------------------------
+		-- User ports ends
+		-- Do not modify the ports beyond this line
+
+		-- Ports of Axi Responder/Slave Bus Interface S00_AXI
+		s00_axi_aclk	: in std_logic;
+		s00_axi_aresetn	: in std_logic;
+		s00_axi_awaddr	: in std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0);
+		s00_axi_awprot	: in std_logic_vector(2 downto 0);
+		s00_axi_awvalid	: in std_logic;
+		s00_axi_awready	: out std_logic;
+		s00_axi_wdata	: in std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
+		s00_axi_wstrb	: in std_logic_vector((C_S00_AXI_DATA_WIDTH/8)-1 downto 0);
+		s00_axi_wvalid	: in std_logic;
+		s00_axi_wready	: out std_logic;
+		s00_axi_bresp	: out std_logic_vector(1 downto 0);
+		s00_axi_bvalid	: out std_logic;
+		s00_axi_bready	: in std_logic;
+		s00_axi_araddr	: in std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0);
+		s00_axi_arprot	: in std_logic_vector(2 downto 0);
+		s00_axi_arvalid	: in std_logic;
+		s00_axi_arready	: out std_logic;
+		s00_axi_rdata	: out std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
+		s00_axi_rresp	: out std_logic_vector(1 downto 0);
+		s00_axi_rvalid	: out std_logic;
+		s00_axi_rready	: in std_logic
+	);
 end component;
 
 ---------------------------------------------------------------------------- 
@@ -247,33 +332,48 @@ port map(
 --		right_audio_data_o    => right_rx,
 --		adc_serial_data_i     => ac_adc_data_i); -- CHANGED TO CUT OFF RECIEVER (easier than switching others)
 	
------------------------------------------------------------------------------- 
-
-
----------------------------------------------------------------------------- 
--- DDS Tone Generators
-----------------------------------------------------------------------------     
--- DDS audio tone generator -- left audio
-left_dds : dds_controller 
-    port map (
-        clk_i => mclk,
-        enable_i => dds_enable_i ,
-        reset_i => dds_reset_i,
-        phase_inc_i => phase_inc_left,
-        data_o => left_dds_data);
-
-----------------------------------------------------------------------------     
--- DDS audio tone generator -- right audio
-right_dds : dds_controller 
-    port map (
-        clk_i => mclk,
-        enable_i => dds_enable_i,
-        reset_i => dds_reset_i,
-        phase_inc_i => phase_inc_right,
-        data_o => right_dds_data);
-
 ---------------------------------------------------------------------------- 
 
+axis_dds : axi_dds
+    port map (
+        dds_clk_i                   => lrclk,
+		dds_enable_i                => dds_enable_i,
+		dds_reset_i                 => dds_reset_i,
+		left_dds_data_o             => left_dds_data,
+		right_dds_data_o            => right_dds_data,
+		
+		-- Debug ports to send to ILA
+		left_dds_phase_inc_dbg_o    => left_phase_inc_debug,
+		right_dds_phase_inc_dbg_o   => right_phase_inc_debug,
+		
+		----------------------------------------------------------------------------
+		-- User ports ends
+		-- Do not modify the ports beyond this line
+
+		-- Ports of Axi Responder/Slave Bus Interface S00_AXI
+		s00_axi_aclk                => s00_axi_aclk,
+		s00_axi_aresetn             => s00_axi_aresetn,
+		s00_axi_awaddr              => s00_axi_awaddr,
+		s00_axi_awprot              => s00_axi_awprot,
+		s00_axi_awvalid             => s00_axi_awvalid,
+		s00_axi_awready             => s00_axi_awready,
+		s00_axi_wdata               => s00_axi_wdata,
+		s00_axi_wstrb               => s00_axi_wstrb,
+		s00_axi_wvalid              => s00_axi_wvalid,
+		s00_axi_wready              => s00_axi_wready,
+		s00_axi_bresp               => s00_axi_bresp,
+		s00_axi_bvalid              => s00_axi_bvalid,
+		s00_axi_bready              => s00_axi_bready,
+		s00_axi_araddr              => s00_axi_araddr,
+		s00_axi_arprot              => s00_axi_arprot,
+		s00_axi_arvalid             => s00_axi_arvalid,
+		s00_axi_arready             => s00_axi_arready,
+		s00_axi_rdata               => s00_axi_rdata,
+		s00_axi_rresp               => s00_axi_rresp,
+		s00_axi_rvalid              => s00_axi_rvalid,
+		s00_axi_rready              => s00_axi_rready
+    );
+----------------------------------------------------------------------------------
 
 -- I2S transmitter
 transmitter: i2s_transmitter
@@ -322,9 +422,9 @@ port map(
 );
 
 -- Latch the debug signals to be observed in the ILA
-dbg_left_audio_rx_o <= left_rx;
+dbg_left_audio_rx_o <= left_dds_data;
 dbg_left_audio_tx_o <= left_tx;
-dbg_right_audio_rx_o <= right_rx;
+dbg_right_audio_rx_o <= right_dds_data;
 dbg_right_audio_tx_o <= right_tx;
 
 ---------------------------------------------------------------------------- 

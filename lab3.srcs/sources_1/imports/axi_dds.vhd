@@ -195,8 +195,12 @@ begin
 	-- Add user logic here
     ----------------------------------------------------------------------------    
     -- Connect signals to ports
-    left_dds_phase_incr <= left_phase_incr_axi_data(DDS_PHASE_DATA_WIDTH-1 downto 0); -- take LSBs
+    left_dds_phase_incr <= left_phase_incr_axi_data(DDS_PHASE_DATA_WIDTH-1 downto 0); -- take LSBs COMMENT BACK IN WHEN GENERATING BITSTREAM
     right_dds_phase_incr <= right_phase_incr_axi_data(DDS_PHASE_DATA_WIDTH-1 downto 0); -- take LSBs
+
+--    left_dds_phase_incr <= std_logic_vector(to_unsigned(30, DDS_PHASE_DATA_WIDTH));
+--    right_dds_phase_incr <= std_logic_vector(to_unsigned(60, DDS_PHASE_DATA_WIDTH));
+
     left_dds_phase_inc_dbg_o <= left_dds_phase_incr; -- debug signal to ILA
     right_dds_phase_inc_dbg_o <= right_dds_phase_incr; -- debug signal to ILA
 
