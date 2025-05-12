@@ -1,0 +1,345 @@
+----------------------------------------------------------------------------
+--  Lab 2: AXI I2S Wrapper
+----------------------------------------------------------------------------
+--  ENGS 128 Spring 2025
+--	Author: James Quirk and Dak Black
+----------------------------------------------------------------------------
+--	Description: Wrapper that presents the I2S interfaces in the more universal AXI convention
+----------------------------------------------------------------------------
+-- Add libraries 
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;     
+use IEEE.STD_LOGIC_UNSIGNED.ALL;                                    
+----------------------------------------------------------------------------
+-- Entity definition
+entity axis_i2s_wrapper is
+	generic (
+		-- Parameters of Axi Stream Bus Interface S00_AXIS, M00_AXIS
+		C_AXI_STREAM_DATA_WIDTH	: integer	:= 32;
+		AC_DATA_WIDTH : integer := 24;
+		PHASE_DATA_WIDTH :  integer := 12
+	);
+    Port ( 
+        ----------------------------------------------------------------------------
+        -- Fabric clock from Zynq PS
+		sysclk_i : in  std_logic;	
+		
+        ----------------------------------------------------------------------------
+        -- I2S audio codec ports		
+		-- User controls
+		ac_mute_en_i : in STD_LOGIC;
+		dds_reset_i : in STD_LOGIC;
+		dds_enable_i  : in STD_LOGIC;
+		dds_freq_sel_i : in STD_LOGIC_VECTOR(2 downto 0);
+
+		-- Audio Codec I2S controls
+        ac_bclk_o : out STD_LOGIC;
+        ac_mclk_o : out STD_LOGIC;
+        ac_mute_n_o : out STD_LOGIC;	-- Active Low
+        
+        -- Audio Codec DAC (audio out)
+        ac_dac_data_o : out STD_LOGIC;
+        ac_dac_lrclk_o : out STD_LOGIC;
+        
+        -- Audio Codec ADC (audio in)
+        ac_adc_data_i : in STD_LOGIC;
+        ac_adc_lrclk_o : out STD_LOGIC;
+        
+        ----------------------------------------------------------------------------
+        -- AXI Stream Interface (Receiver/Responder)
+    	-- Ports of Axi Responder Bus Interface S00_AXIS
+		s00_axis_aclk     : in std_logic;
+		s00_axis_aresetn  : in std_logic;
+		s00_axis_tready   : out std_logic;
+		s00_axis_tdata	  : in std_logic_vector(C_AXI_STREAM_DATA_WIDTH-1 downto 0);
+		s00_axis_tstrb    : in std_logic_vector((C_AXI_STREAM_DATA_WIDTH/8)-1 downto 0);
+		s00_axis_tlast    : in std_logic;
+		s00_axis_tvalid   : in std_logic;
+		
+        -- AXI Stream Interface (Tranmitter/Controller)
+		-- Ports of Axi Controller Bus Interface M00_AXIS
+		m00_axis_aclk     : in std_logic;
+		m00_axis_aresetn  : in std_logic;
+		m00_axis_tvalid   : out std_logic;
+		m00_axis_tdata    : out std_logic_vector(C_AXI_STREAM_DATA_WIDTH-1 downto 0);
+		m00_axis_tstrb    : out std_logic_vector((C_AXI_STREAM_DATA_WIDTH/8)-1 downto 0);
+		m00_axis_tlast    : out std_logic;
+		m00_axis_tready   : in std_logic;
+		
+		-- Debug ports (ILA)
+		dbg_left_audio_rx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		dbg_left_audio_tx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		dbg_right_audio_rx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		dbg_right_audio_tx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0)
+
+		);
+end axis_i2s_wrapper;
+----------------------------------------------------------------------------
+architecture Behavioral of axis_i2s_wrapper is
+----------------------------------------------------------------------------
+-- Define Constants and Signals
+----------------------------------------------------------------------------
+signal mclk : std_logic := '0';
+signal bclk : std_logic := '0';
+signal lrclk: std_logic := '0';
+signal left_rx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal right_rx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal left_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal right_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+
+signal phase_inc_left : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+signal phase_inc_right : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+
+signal left_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal right_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+
+-- Debug ports (ILA)
+
+----------------------------------------------------------------------------
+-- Component declarations
+----------------------------------------------------------------------------
+-- Clock generation
+component i2s_clock_gen is
+    Port (
+
+        -- System clock in
+		sysclk_125MHz_i   : in  std_logic;	
+		
+		-- Forwarded clocks
+		mclk_fwd_o		  : out std_logic;	
+		bclk_fwd_o        : out std_logic;
+		adc_lrclk_fwd_o   : out std_logic;
+		dac_lrclk_fwd_o   : out std_logic;
+
+        -- Clocks for I2S components
+		mclk_o		      : out std_logic;	
+		bclk_o            : out std_logic;
+		lrclk_o           : out std_logic);  
+end component;
+
+----------------------------------------------------------------------------------
+-- I2S receiver
+component i2s_receiver is
+    Generic (AC_DATA_WIDTH : integer := AC_DATA_WIDTH);
+    Port (
+
+        -- Timing
+		mclk_i    : in std_logic;	
+		bclk_i    : in std_logic;	
+		lrclk_i   : in std_logic;
+		
+		-- Data
+		left_audio_data_o     : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		right_audio_data_o    : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		adc_serial_data_i     : in std_logic);  
+end component; 
+
+----------------------------------------------------------------------------------
+-- I2S transmitter
+component i2s_transmitter is
+    Generic (AC_DATA_WIDTH : integer := AC_DATA_WIDTH);
+    Port (
+
+        -- Timing
+		mclk_i    : in std_logic;	
+		bclk_i    : in std_logic;	
+		lrclk_i   : in std_logic;
+		
+		-- Data
+		left_audio_data_i     : in std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		right_audio_data_i    : in std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		dac_serial_data_o     : out std_logic);  
+end component; 
+
+
+----------------------------------------------------------------------------------
+-- DDS audio tone generator
+component dds_controller is
+    Generic ( DDS_DATA_WIDTH : integer := AC_DATA_WIDTH;       -- DDS data width
+            PHASE_DATA_WIDTH : integer := PHASE_DATA_WIDTH);      -- DDS phase increment data width
+    Port ( 
+      clk_i         : in std_logic;
+      enable_i      : in std_logic;
+      reset_i       : in std_logic;
+      phase_inc_i   : in std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+      
+      data_o        : out std_logic_vector(DDS_DATA_WIDTH-1 downto 0)); 
+end component;
+
+---------------------------------------------------------------------------- 
+-- AXI stream transmitter
+component axis_transmitter is
+    generic (
+		DATA_WIDTH	: integer	:= AC_DATA_WIDTH;
+		FIFO_WIDTH	: integer	:= C_AXI_STREAM_DATA_WIDTH
+	);
+	port (
+	
+		-- Ports of Axi Responder Bus Interface S00_AXIS
+		lrclk_i              : in std_logic;
+		m00_axis_aclk        : in std_logic;
+		m00_axis_aresetn     : in std_logic;
+		left_audio_data_i    : in std_logic_vector(DATA_WIDTH-1 downto 0);
+        right_audio_data_i   : in std_logic_vector(DATA_WIDTH-1 downto 0);
+		m00_axis_tready      : in std_logic;
+		
+		m00_axis_tdata       : out std_logic_vector(FIFO_WIDTH-1 downto 0);
+		m00_axis_tlast       : out std_logic := '0';
+		m00_axis_tstrb       : out std_logic_vector(3 downto 0) := (others => '0');
+		m00_axis_tvalid      : out std_logic
+	);
+end component;
+    
+---------------------------------------------------------------------------- 
+-- AXI stream receiver
+component axis_receiver is
+    generic (
+		DATA_WIDTH	: integer	:= 24;
+		FIFO_WIDTH	: integer	:= 32
+	);
+	port (
+	
+		-- Ports of Axi Responder Bus Interface S00_AXIS
+		lrclk_i              : in std_logic;
+		s00_axis_aclk        : in std_logic;
+		s00_axis_tdata       : in std_logic_vector(FIFO_WIDTH-1 downto 0);
+		s00_axis_aresetn     : in std_logic;
+		s00_axis_tlast       : in std_logic;
+		s00_axis_tstrb       : in std_logic_vector(3 downto 0);
+		s00_axis_tvalid      : in std_logic;
+		
+        left_audio_data_o    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        right_audio_data_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+		s00_axis_tready      : out std_logic
+
+	);
+end component;
+----------------------------------------------------------------------------
+begin
+----------------------------------------------------------------------------
+-- Component instantiations
+----------------------------------------------------------------------------    
+-- Clock generation
+clock_generation: i2s_clock_gen
+port map(
+    sysclk_125MHz_i => sysclk_i,
+    mclk_fwd_o      => ac_mclk_o,
+    bclk_fwd_o      => ac_bclk_o,
+    adc_lrclk_fwd_o => ac_adc_lrclk_o,
+    dac_lrclk_fwd_o => ac_dac_lrclk_o,
+    mclk_o          => mclk,
+    bclk_o			=> bclk,
+	lrclk_o			=> lrclk
+	);
+
+
+-- ATTACHING DDS INSTEAD
+
+------------------------------------------------------------------------------ 
+---- I2S receiver
+--receiver: i2s_receiver
+--    port map (
+--		mclk_i                => mclk,
+--        bclk_i                => bclk,	
+--		lrclk_i               => lrclk,
+--		left_audio_data_o     => left_rx,
+--		right_audio_data_o    => right_rx,
+--		adc_serial_data_i     => ac_adc_data_i); -- CHANGED TO CUT OFF RECIEVER (easier than switching others)
+	
+------------------------------------------------------------------------------ 
+
+
+---------------------------------------------------------------------------- 
+-- DDS Tone Generators
+----------------------------------------------------------------------------     
+-- DDS audio tone generator -- left audio
+left_dds : dds_controller 
+    port map (
+        clk_i => mclk,
+        enable_i => dds_enable_i ,
+        reset_i => dds_reset_i,
+        phase_inc_i => phase_inc_left,
+        data_o => left_dds_data);
+
+----------------------------------------------------------------------------     
+-- DDS audio tone generator -- right audio
+right_dds : dds_controller 
+    port map (
+        clk_i => mclk,
+        enable_i => dds_enable_i,
+        reset_i => dds_reset_i,
+        phase_inc_i => phase_inc_right,
+        data_o => right_dds_data);
+
+---------------------------------------------------------------------------- 
+
+
+-- I2S transmitter
+transmitter: i2s_transmitter
+port map(
+    mclk_i              => mclk,
+    bclk_i              => bclk,
+    lrclk_i             => lrclk,
+    left_audio_data_i   => left_tx,		-- REMEMBER: CHANGE BACK TO LEFT_AUDIO_DATA_TX
+    right_audio_data_i  => right_tx,
+    dac_serial_data_o   => ac_dac_data_o);		-- DUT output
+
+---------------------------------------------------------------------------- 
+-- AXI stream transmitter
+axi_transmitter: axis_transmitter
+port map(
+    -- Ports of Axi Responder Bus Interface S00_AXIS
+    lrclk_i             => lrclk,           
+    m00_axis_aclk       => m00_axis_aclk,
+    m00_axis_aresetn    => m00_axis_aresetn,
+    left_audio_data_i   => left_dds_data,
+    right_audio_data_i  => right_dds_data,
+    m00_axis_tready     => m00_axis_tready,
+    
+    m00_axis_tdata      => m00_axis_tdata,
+    m00_axis_tlast      => m00_axis_tlast,
+    m00_axis_tstrb      => m00_axis_tstrb,
+    m00_axis_tvalid     => m00_axis_tvalid
+);
+    
+---------------------------------------------------------------------------- 
+-- AXI stream receiver
+axi_receiver: axis_receiver
+port map(
+    -- Ports of Axi Responder Bus Interface S00_AXIS
+    lrclk_i             => lrclk,           
+    s00_axis_aclk       => s00_axis_aclk,
+    s00_axis_aresetn    => s00_axis_aresetn,
+    s00_axis_tdata      => s00_axis_tdata,
+    s00_axis_tlast      => s00_axis_tlast,
+    s00_axis_tstrb      => s00_axis_tstrb,
+    s00_axis_tvalid     => s00_axis_tvalid,
+    
+    s00_axis_tready     => s00_axis_tready,
+    left_audio_data_o   => left_tx,
+    right_audio_data_o  => right_tx
+);
+
+-- Latch the debug signals to be observed in the ILA
+dbg_left_audio_rx_o <= left_rx;
+dbg_left_audio_tx_o <= left_tx;
+dbg_right_audio_rx_o <= right_rx;
+dbg_right_audio_tx_o <= right_tx;
+
+---------------------------------------------------------------------------- 
+-- Logic
+---------------------------------------------------------------------------- 
+-- sets the low-active mute signal
+pass_mute: process(mclk)
+begin
+    if (rising_edge(mclk)) then
+        ac_mute_n_o <= not(ac_mute_en_i);
+    end if;
+end process pass_mute;
+
+
+----------------------------------------------------------------------------
+
+
+end Behavioral;
