@@ -32,7 +32,7 @@ entity axis_fifo is
 		m00_axis_aclk     : in std_logic;
 		m00_axis_aresetn  : in std_logic;
 		m00_axis_tvalid   : out std_logic;
-		m00_axis_tdata    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+		m00_axis_tdata    : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
 		m00_axis_tstrb    : out std_logic_vector((DATA_WIDTH/8)-1 downto 0);
 		m00_axis_tlast    : out std_logic;
 		m00_axis_tready   : in std_logic

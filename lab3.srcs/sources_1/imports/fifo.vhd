@@ -27,7 +27,7 @@ Port (
     
     -- Read channel
     rd_en_i     : in std_logic;
-    rd_data_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+    rd_data_o   : out std_logic_vector(DATA_WIDTH-1 downto 0)  := (others => '0');
     
     -- Status flags
     empty_o         : out std_logic;
@@ -46,7 +46,8 @@ signal fifo_buf : mem_type := (others => (others => '0'));
 signal read_pointer, write_pointer : integer range 0 to FIFO_DEPTH-1 := 0;
 signal data_count : integer range 0 to FIFO_DEPTH := 0;
 
-signal full, empty, ctr_d_add, ctr_d_subtr : std_logic ;
+signal full, ctr_d_add, ctr_d_subtr : std_logic := '0';
+signal empty : std_logic:= '1';
 
 ----------------------------------------------------------------------------
 begin
@@ -101,7 +102,7 @@ end process pointer_inc;
 
 
 -- Dictates how the data_count variable should be changed in pointer_inc and when to indicate a full or empty FIFO
-signals_set: process(data_count, full, empty,rd_en_i, wr_en_i)
+signals_set: process(data_count, full, empty, rd_en_i, wr_en_i)
 begin
     full <= '0';
     empty  <= '0';

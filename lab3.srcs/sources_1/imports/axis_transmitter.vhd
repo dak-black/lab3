@@ -37,7 +37,9 @@ entity axis_transmitter is
 		m00_axis_tdata       : out std_logic_vector(FIFO_WIDTH-1 downto 0);
 		m00_axis_tlast       : out std_logic := '0';
 		m00_axis_tstrb       : out std_logic_vector(3 downto 0) := (others => '0');
-		m00_axis_tvalid      : out std_logic
+		m00_axis_tvalid      : out std_logic;
+		
+		s_ready           : out std_logic := '0'
 	);
 end axis_transmitter;
 
@@ -45,7 +47,7 @@ architecture Behavioral of axis_transmitter is
 
 ----------------------------------------------------------------------------
 -- FSM states
-type state_type is (Idle, LTransmit, RTransmit, Hold);	
+type state_type is (Idle, LTransmit, RTransmit, Hold, ReadyOut);	
 signal curr_state, next_state : state_type := Idle;
 
 signal Ltemp1, Rtemp1, Ltemp2, Rtemp2 : std_logic_vector(FIFO_WIDTH-1 downto 0);
@@ -83,8 +85,11 @@ begin
 			if (m00_axis_aresetn = '0') then
 			    next_state <= Idle;
 			elsif (m00_axis_tready = '1') then     -- wait until enabled		   
-		        next_state <= Hold;
+		        next_state <= ReadyOut ;
             end if;
+            
+        when ReadyOut =>
+            next_state <= Hold;
             
         when Hold => -- Wait until axi clock falls again before returning to the beginning of the cycle so that we don't repeatedly trigger on the same lrclk high cycle
             if (m00_axis_aresetn = '0') then
@@ -92,6 +97,8 @@ begin
             elsif (lrclk_temp2 = '0') then
 			    next_state <= Idle;
             end if;
+        
+
 
 		when others => -- this is like the "else" part of an if/else statement, but shouldn't reached
 			next_state <= Idle;
@@ -109,7 +116,8 @@ begin
     -- ++++ Write your output logic here ++++ 
     -- ++++ Set defaults at the top, and use a CASE statement ++++ 
 	-- Defaults
-	m00_axis_tvalid <= '0'; 	
+	m00_axis_tvalid <= '0'; 
+	s_ready <= '0';		
 
     -- Use a case statement to switch between states
     case curr_state is	
@@ -122,7 +130,10 @@ begin
         when RTransmit => -- Ready to transmit
 			m00_axis_tvalid <= '1';
 				
-		when Hold =>	
+		when Hold =>
+		
+		when ReadyOut => 
+		  s_ready <= '1';	
 			
 		when others => -- this is like the "else" part of an if/else statement, but shouldn't reached
 			

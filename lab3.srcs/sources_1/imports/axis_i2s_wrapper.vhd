@@ -112,8 +112,8 @@ signal right_rx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal left_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal right_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 
-signal phase_inc_left : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
-signal phase_inc_right : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+--signal phase_inc_left : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+--signal phase_inc_right : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0); --not used
 
 signal left_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal right_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);

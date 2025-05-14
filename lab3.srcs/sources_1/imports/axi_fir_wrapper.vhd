@@ -49,80 +49,76 @@ architecture Behavioral of axis_fir is
 ----------------------------------------------------------------------------
 -- Signals
 ----------------------------------------------------------------------------  
-signal data_lpf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_hpf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_bpf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_bsf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0);
+signal data_lpf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_hpf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_bpf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_bsf_l_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
-signal data_lpf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_hpf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_bpf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_bsf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0);
+signal data_lpf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_hpf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_bpf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_bsf_r_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
-signal data_r_i: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_l_i: std_logic_vector(FIR_WIDTH-1 downto 0);
+signal data_r_i: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_l_i: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
-signal data_r_o: std_logic_vector(FIR_WIDTH-1 downto 0);
-signal data_l_o: std_logic_vector(FIR_WIDTH-1 downto 0);
+signal data_r_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
+signal data_l_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
+signal lpf_r_valid          : std_logic := '0';
+signal lpf_l_valid          : std_logic := '0';
 
+signal hpf_r_valid          : std_logic := '0';
+signal hpf_l_valid          : std_logic := '0';
 
-signal m00_axis_tvalid_lbsf : std_logic;
-signal m00_axis_tvalid_rbsf : std_logic;
+signal bpf_r_valid          : std_logic := '0';
+signal bpf_l_valid          : std_logic := '0';
 
-signal m00_axis_tvalid_lbpf : std_logic;
-signal m00_axis_tvalid_rbpf : std_logic;
+signal bsf_r_valid          : std_logic := '0';
+signal bsf_l_valid          : std_logic := '0';
 
-signal m00_axis_tvalid_lhpf : std_logic;
-signal m00_axis_tvalid_rhpf : std_logic;
+signal slpf_r_valid          : std_logic := '0';
+signal slpf_l_valid          : std_logic := '0';
 
-signal m00_axis_tvalid_llpf : std_logic;
-signal m00_axis_tvalid_rlpf : std_logic;
+signal shpf_r_valid          : std_logic := '0';
+signal shpf_l_valid          : std_logic := '0';
 
-signal lpf_r_ready          : std_logic;
-signal lpf_l_ready          : std_logic;
+signal sbpf_r_valid          : std_logic := '0';
+signal sbpf_l_valid          : std_logic := '0';
 
-signal hpf_r_ready          : std_logic;
-signal hpf_l_ready          : std_logic;
+signal sbsf_r_valid          : std_logic := '0';
+signal sbsf_l_valid          : std_logic := '0';
 
-signal bpf_r_ready          : std_logic;
-signal bpf_l_ready          : std_logic;
+signal lpf_r_ready          : std_logic := '0';
+signal lpf_l_ready          : std_logic := '0';
 
-signal bsf_r_ready          : std_logic;
-signal bsf_l_ready          : std_logic;
+signal hpf_r_ready          : std_logic := '0';
+signal hpf_l_ready          : std_logic := '0';
 
-signal slpf_r_ready          : std_logic;
-signal slpf_l_ready          : std_logic;
+signal bpf_r_ready          : std_logic := '0';
+signal bpf_l_ready          : std_logic := '0';
 
-signal shpf_r_ready          : std_logic;
-signal shpf_l_ready          : std_logic;
+signal bsf_r_ready          : std_logic := '0';
+signal bsf_l_ready          : std_logic := '0';
 
-signal sbpf_r_ready          : std_logic;
-signal sbpf_l_ready          : std_logic;
+signal slpf_r_ready          : std_logic := '0';
+signal slpf_l_ready          : std_logic := '0';
 
-signal sbsf_r_ready          : std_logic;
-signal sbsf_l_ready          : std_logic;
+signal shpf_r_ready          : std_logic := '0';
+signal shpf_l_ready          : std_logic := '0';
 
+signal sbpf_r_ready          : std_logic := '0';
+signal sbpf_l_ready          : std_logic := '0';
 
+signal sbsf_r_ready          : std_logic := '0';
+signal sbsf_l_ready          : std_logic := '0';
 
-signal mlpf_r_valid          : std_logic;
-signal mlpf_l_valid          : std_logic;
+signal recv_ready            : std_logic := '0';
+signal s_ready            : std_logic := '0';
 
-signal mhpf_r_valid          : std_logic;
-signal mhpf_l_valid          : std_logic;
+signal lr_valid_i         :  std_logic := '0';
 
-signal mbpf_r_valid          : std_logic;
-signal mbpf_l_valid          : std_logic;
-
-signal mbsf_r_valid          : std_logic;
-signal mbsf_l_valid          : std_logic;
-
-signal tmit_valid            : std_logic;      
-signal recv_ready            : std_logic;
-
-signal lr_valid_i         :  std_logic;
-
-signal filter_output    : std_logic_vector(AXI_WIDTH-1 downto 0);
+signal filter_output    : std_logic_vector(AXI_WIDTH-1 downto 0) := (others => '0');
 
 
 ----------------------------------------------------------------------------
@@ -157,7 +153,8 @@ component axis_transmitter
 		m00_axis_tdata       : out std_logic_vector(AXI_WIDTH-1 downto 0);
 		m00_axis_tlast       : out std_logic := '0';
 		m00_axis_tstrb       : out std_logic_vector(3 downto 0) := (others => '0');
-		m00_axis_tvalid      : out std_logic	
+		m00_axis_tvalid      : out std_logic;
+		s_ready           : out std_logic	
 		);
 end component;
 
@@ -221,9 +218,6 @@ component fir_bsf_0
   );
 end component;
 
--- FSM states
-type state_type is (Idle, Ready, LReceive, RReceive, Hold);	
-signal curr_state, next_state : state_type := Idle;
 
 
 ----------------------------------------------------------------------------
@@ -239,7 +233,7 @@ lpf_l_inst : fir_lpf_0
     s_axis_data_tvalid => lr_valid_i ,
     s_axis_data_tready => slpf_l_ready,
     s_axis_data_tdata => data_l_i,
-    m_axis_data_tvalid => mlpf_l_valid,
+    m_axis_data_tvalid => lpf_l_valid,
     m_axis_data_tready => lpf_l_ready,
     m_axis_data_tdata => data_lpf_l_o
   );
@@ -250,8 +244,8 @@ lpf_r_inst : fir_lpf_0
     s_axis_data_tvalid => lr_valid_i,
     s_axis_data_tready => slpf_r_ready,
     s_axis_data_tdata => data_r_i,
-    m_axis_data_tvalid => mlpf_r_valid,
-    m_axis_data_tready => lpf_l_ready,
+    m_axis_data_tvalid => lpf_r_valid,
+    m_axis_data_tready => lpf_r_ready,
     m_axis_data_tdata => data_lpf_r_o
   );
 
@@ -262,7 +256,7 @@ hpf_l_inst : fir_hpf_0
     s_axis_data_tvalid => lr_valid_i,
     s_axis_data_tready => shpf_l_ready,
     s_axis_data_tdata => data_l_i,
-    m_axis_data_tvalid => mhpf_l_valid,
+    m_axis_data_tvalid => hpf_l_valid,
     m_axis_data_tready => hpf_l_ready,
     m_axis_data_tdata => data_hpf_l_o
   );
@@ -273,7 +267,7 @@ hpf_l_inst : fir_hpf_0
     s_axis_data_tvalid => lr_valid_i,
     s_axis_data_tready => shpf_r_ready,
     s_axis_data_tdata => data_r_i,
-    m_axis_data_tvalid => mhpf_r_valid,
+    m_axis_data_tvalid => hpf_r_valid,
     m_axis_data_tready => hpf_r_ready,
     m_axis_data_tdata => data_hpf_r_o
   );
@@ -284,7 +278,7 @@ hpf_l_inst : fir_hpf_0
     s_axis_data_tvalid => lr_valid_i,
     s_axis_data_tready => sbpf_l_ready,
     s_axis_data_tdata => data_l_i,
-    m_axis_data_tvalid => mbpf_l_valid,
+    m_axis_data_tvalid => bpf_l_valid,
     m_axis_data_tready => bpf_l_ready,
     m_axis_data_tdata => data_bpf_l_o
   );
@@ -295,7 +289,7 @@ bpf_r_inst : fir_bpf_0
     s_axis_data_tvalid => lr_valid_i,
     s_axis_data_tready => sbpf_r_ready,
     s_axis_data_tdata => data_r_i,
-    m_axis_data_tvalid => mbpf_r_valid,
+    m_axis_data_tvalid => bpf_r_valid,
     m_axis_data_tready => bpf_r_ready,
     m_axis_data_tdata => data_bpf_r_o
   );
@@ -306,8 +300,8 @@ bpf_r_inst : fir_bpf_0
     s_axis_data_tvalid => lr_valid_i,
     s_axis_data_tready => sbsf_l_ready,
     s_axis_data_tdata => data_l_i,
-    m_axis_data_tvalid => mbsf_l_valid,
-    m_axis_data_tready => bpf_r_ready,
+    m_axis_data_tvalid => bsf_l_valid,
+    m_axis_data_tready => bsf_l_ready,
     m_axis_data_tdata => data_bsf_l_o
   );
 
@@ -318,7 +312,7 @@ bsf_r_inst : fir_bsf_0
     s_axis_data_tvalid => lr_valid_i,
     s_axis_data_tready => sbsf_r_ready,
     s_axis_data_tdata => data_r_i,
-    m_axis_data_tvalid => mbsf_r_valid,
+    m_axis_data_tvalid => bsf_r_valid,
     m_axis_data_tready => bsf_r_ready,
     m_axis_data_tdata => data_bsf_r_o
   );
@@ -354,7 +348,8 @@ receiver_inst : axis_receiver
 		m00_axis_tdata       => filter_output,
 		m00_axis_tlast       => m00_axis_tlast,
 		m00_axis_tstrb       => m00_axis_tstrb,
-		m00_axis_tvalid      => tmit_valid	
+		m00_axis_tvalid      => m00_axis_tvalid,
+		s_ready           => 	s_ready
 		);
    
    
@@ -366,19 +361,46 @@ begin
     if rising_edge(s00_axis_aclk) then
         if fir_sel_i(1) = '0' then 
             if fir_sel_i(0) = '0' then
-                data_l_o <= data_lpf_l_o ;
-                data_r_o <= data_lpf_r_o ;
+                lpf_l_ready <= s_ready; 
+                if lpf_l_valid = '1' then
+                    data_l_o <= data_lpf_l_o ;
+                end if;
+                lpf_r_ready <= s_ready;
+                if lpf_r_valid = '1' then
+                    data_r_o <= data_lpf_r_o ;
+                end if;
             else
-                data_l_o <= data_hpf_l_o ;
-                data_r_o <= data_hpf_r_o ;
+                hpf_l_ready <= s_ready;
+                if hpf_l_valid = '1' then
+                    data_l_o <= data_hpf_l_o ;
+                end if;
+                 hpf_r_ready <= s_ready;               
+                if hpf_r_valid = '1' then
+                    data_r_o <= data_hpf_r_o ; 
+                end if;               
+                
             end if;
         else
             if fir_sel_i(0) = '0' then
-                data_l_o <= data_bpf_l_o ;
-                data_r_o <= data_bpf_r_o ;
+                if bpf_l_valid = '1' then
+                bpf_l_ready <= s_ready;                
+                    data_l_o <= data_bpf_l_o ;
+                end if;
+                
+                bpf_r_ready <= s_ready;
+                if bpf_r_valid = '1' then
+                    data_r_o <= data_bpf_r_o ;               
+                end if;
             else
-                data_l_o <= data_bsf_l_o ;
-                data_r_o <= data_bsf_r_o ;
+                bsf_l_ready <= s_ready;
+                if bsf_l_valid = '1' then
+                    data_l_o <= data_bsf_l_o ;
+                end if;    
+                
+                bsf_r_ready <= s_ready;
+                if bsf_l_valid = '1' then
+                    data_r_o <= data_bsf_r_o ;
+                end if;            
             end if; 
        end if;
    end if; 
@@ -389,7 +411,7 @@ filter_activate: process(s00_axis_aclk)
 begin
     if rising_edge(s00_axis_aclk) then
          if fir_sel_i(2) = '1' then 
-            m00_axis_tdata <= s00_axis_tdata;  
+            m00_axis_tdata <= s00_axis_tdata;                  
          else
             m00_axis_tdata <= filter_output;
          end if;
@@ -405,21 +427,10 @@ begin
          else  
               s00_axis_tready <= '0';          
          end if;
+         
     end if;
      
 end process ready_handler;
-
-valid_handler: process(s00_axis_aclk )
-begin
-    if rising_edge(s00_axis_aclk ) then
-         if tmit_valid  = '1' or mbpf_l_valid = '1' or mbpf_r_valid  = '1' or mbsf_l_valid  = '1' or mbsf_r_valid = '1' or mhpf_l_valid  = '1' or mhpf_r_valid = '1' or mlpf_l_valid = '1' or mlpf_r_valid ='1' then 
-              m00_axis_tvalid <= '1';
-         else  
-              m00_axis_tvalid <= '0';          
-         end if;
-    end if;
-     
-end process valid_handler;
 
 
 

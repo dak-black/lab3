@@ -1,9 +1,9 @@
 {
    "ActiveEmotionalView":"Default View",
-   "Default View_ScaleFactor":"1.10385",
-   "Default View_TopLeft":"-156,-72",
+   "Default View_ScaleFactor":"1.08177",
+   "Default View_TopLeft":"-156,-98",
    "ExpandedHierarchyInLayout":"",
-   "guistr":"# # String gsaved with Nlview 7.0r6  2020-01-29 bk=1.5227 VDI=41 GEI=36 GUI=JA:10.0 non-TLS
+   "guistr":"# # String gsaved with Nlview 7.0r6  2020-01-29 bk=1.5227 VDI=41 GEI=36 GUI=JA:10.0 non-TLS-threadsafe
 #  -string -flagsOSRD
 preplace port DDR -pg 1 -lvl 7 -x 2310 -y 390 -defaultsOSRD
 preplace port FIXED_IO -pg 1 -lvl 7 -x 2310 -y 600 -defaultsOSRD
@@ -18,39 +18,37 @@ preplace port port-id_ac_mute_en_i_0 -pg 1 -lvl 0 -x -10 -y 20 -defaultsOSRD
 preplace port port-id_s_axi_aclk_0 -pg 1 -lvl 0 -x -10 -y 760 -defaultsOSRD
 preplace portBus fir_sel_i_0 -pg 1 -lvl 0 -x -10 -y 50 -defaultsOSRD
 preplace inst processing_system7_0 -pg 1 -lvl 1 -x 220 -y 630 -defaultsOSRD
-preplace inst axis_fifo_1 -pg 1 -lvl 5 -x 1640 -y 260 -defaultsOSRD
 preplace inst axi_interconnect_0 -pg 1 -lvl 2 -x 640 -y 720 -defaultsOSRD
-preplace inst rst_ps7_0_50M -pg 1 -lvl 2 -x 640 -y 490 -defaultsOSRD
-preplace inst axi_iic_0 -pg 1 -lvl 3 -x 990 -y 740 -defaultsOSRD
+preplace inst axi_iic_0 -pg 1 -lvl 3 -x 1000 -y 740 -defaultsOSRD
 preplace inst rst_s_axi_aclk_0_100M -pg 1 -lvl 1 -x 220 -y 860 -defaultsOSRD
-preplace inst axis_fifo_0 -pg 1 -lvl 3 -x 990 -y 160 -defaultsOSRD
-preplace inst axis_i2s_wrapper_0 -pg 1 -lvl 6 -x 2040 -y 220 -defaultsOSRD
+preplace inst axis_fifo_0 -pg 1 -lvl 3 -x 1000 -y 160 -defaultsOSRD
+preplace inst axis_fifo_1 -pg 1 -lvl 5 -x 1640 -y 260 -defaultsOSRD
 preplace inst axis_fir_0 -pg 1 -lvl 4 -x 1330 -y 220 -defaultsOSRD
-preplace netloc ac_mute_en_i_0_1 1 0 6 NJ 20 NJ 20 NJ 20 NJ 20 NJ 20 1800J
-preplace netloc axi_iic_0_iic2intc_irpt 1 0 4 30 960 NJ 960 NJ 960 1140
+preplace inst axis_i2s_wrapper_0 -pg 1 -lvl 6 -x 2040 -y 220 -defaultsOSRD
+preplace netloc ac_mute_en_i_0_1 1 0 6 10J 10 NJ 10 NJ 10 NJ 10 NJ 10 1800J
+preplace netloc axi_iic_0_iic2intc_irpt 1 0 4 20 510 NJ 510 NJ 510 1150
 preplace netloc axis_i2s_wrapper_0_ac_adc_lrclk_o 1 6 1 2220J 240n
 preplace netloc axis_i2s_wrapper_0_ac_bclk_o 1 6 1 2230J 120n
 preplace netloc axis_i2s_wrapper_0_ac_dac_data_o 1 6 1 2220J 200n
-preplace netloc axis_i2s_wrapper_0_ac_dac_lrclk_o 1 3 4 1150 40 NJ 40 NJ 40 2240
+preplace netloc axis_i2s_wrapper_0_ac_dac_lrclk_o 1 3 4 1170 40 NJ 40 NJ 40 2240
 preplace netloc axis_i2s_wrapper_0_ac_mclk_o 1 6 1 2250J 150n
 preplace netloc axis_i2s_wrapper_0_ac_mute_n_o 1 6 1 NJ 180
-preplace netloc fir_sel_i_0_1 1 0 4 NJ 50 NJ 50 830J 60 1130J
-preplace netloc processing_system7_0_FCLK_CLK0 1 0 6 30 520 450 180 840 40 1140 100 1470 150 1810
-preplace netloc processing_system7_0_FCLK_RESET0_N 1 0 2 20 510 440
-preplace netloc rst_ps7_0_50M_peripheral_aresetn 1 1 5 460 870 830 260 1130 340 1480 360 1800
-preplace netloc rst_s_axi_aclk_0_100M_peripheral_aresetn 1 1 5 430 390 N 390 N 390 N 390 1790
-preplace netloc s_axi_aclk_0_1 1 0 6 10 760 420 880 850J 590 N 590 N 590 1810
+preplace netloc fir_sel_i_0_1 1 0 4 NJ 50 NJ 50 810J 60 1150J
+preplace netloc processing_system7_0_FCLK_CLK0 1 0 6 10 500 430 180 800 20 1160 100 1470 150 1810
+preplace netloc processing_system7_0_FCLK_RESET0_N 1 0 2 30 520 410
+preplace netloc rst_s_axi_aclk_0_100M_peripheral_aresetn 1 1 5 440 570 820 40 1140 340 1480 360 1820
+preplace netloc s_axi_aclk_0_1 1 0 6 20 760 420 860 810J 500 N 500 N 500 1830
 preplace netloc axi_iic_0_IIC 1 3 4 NJ 720 NJ 720 NJ 720 NJ
-preplace netloc axi_interconnect_0_M00_AXI 1 2 1 820 710n
+preplace netloc axi_interconnect_0_M00_AXI 1 2 1 780 710n
+preplace netloc axi_interconnect_0_M01_AXI 1 2 4 790J 30 NJ 30 NJ 30 1790
 preplace netloc axis_fifo_0_m00_axis 1 3 1 N 160
 preplace netloc axis_fifo_1_m00_axis 1 5 1 1780 110n
 preplace netloc axis_fir_0_m00_axis 1 4 1 N 220
-preplace netloc axis_i2s_wrapper_0_m00_axis 1 2 5 850 50 NJ 50 NJ 50 NJ 50 2220
-preplace netloc processing_system7_0_DDR 1 1 6 410J 380 NJ 380 NJ 380 NJ 380 1800J 390 NJ
-preplace netloc processing_system7_0_FIXED_IO 1 1 6 410J 860 840J 600 NJ 600 NJ 600 NJ 600 NJ
+preplace netloc axis_i2s_wrapper_0_m00_axis 1 2 5 830 50 NJ 50 NJ 50 NJ 50 2220
+preplace netloc processing_system7_0_DDR 1 1 6 420J 390 NJ 390 NJ 390 NJ 390 NJ 390 NJ
+preplace netloc processing_system7_0_FIXED_IO 1 1 6 450J 580 800J 600 NJ 600 NJ 600 NJ 600 NJ
 preplace netloc processing_system7_0_M_AXI_GP0 1 1 1 N 640
-preplace netloc axi_interconnect_0_M01_AXI 1 2 4 810J 30 NJ 30 NJ 30 1790
-levelinfo -pg 1 -10 220 640 990 1330 1640 2040 2310
+levelinfo -pg 1 -10 220 640 1000 1330 1640 2040 2310
 pagesize -pg 1 -db -bbox -sgen -160 0 2450 980
 "
 }

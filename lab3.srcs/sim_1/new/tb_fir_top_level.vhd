@@ -34,20 +34,20 @@ signal test_num : integer := 0;
 signal mute_en_sw : std_logic := '0';
 
 ----------------------------------------------------------------------------
-signal fir_sel : std_logic_vector(2 downto 0);
+signal fir_sel : std_logic_vector(2 downto 0) := (others => '0');
 ----------------------------------------------------------------------------
 -- AXI Stream FIFO
-signal fifo_0_axis_data_out, fifo_0_axis_data_in, fir_data_out : std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
-signal fifo_0_axis_data_out_valid, fifo_0_axis_data_in_valid, fir_data_out_valid : std_logic := '0';
-signal fifo_0_axis_data_out_last, fir_data_out_last, fifo_0_axis_data_in_last : std_logic := '0';
+signal fifo_0_axis_data_out, fir_data_out : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) := (others => '0');
+signal fifo_0_axis_data_out_valid, fir_data_out_valid : std_logic := '0';
+signal fifo_0_axis_data_out_last, fir_data_out_last : std_logic := '0';
 signal fifo_0_axis_ready, fir_ready : std_logic := '0';
 
-signal fifo_1_axis_data_out : std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
-signal fifo_1_axis_data_out_valid : std_logic := '0';
-signal fifo_1_axis_data_out_last : std_logic := '0';
+--signal fifo_1_axis_data_out : std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
+--signal fifo_1_axis_data_out_valid : std_logic := '0';
+--signal fifo_1_axis_data_out_last : std_logic := '0';
 signal fifo_1_axis_ready : std_logic := '0';
 
-signal fifo_0_axis_tstrb, fifo_1_axis_tstrb, fir_data_strb : std_logic_vector((AXI_DATA_WIDTH/8)-1 downto 0);
+signal fifo_0_axis_tstrb, fifo_1_axis_tstrb, fir_data_strb : std_logic_vector((AXI_DATA_WIDTH/8)-1 downto 0) := (others => '0');
 
 -- Define constants 
 constant LRCLK_PERIOD: time := 20833ns; 	-- define clock period, 20833ns = 48 kHz
@@ -57,47 +57,47 @@ constant C_S00_AXI_ADDR_WIDTH : integer := 4;
 
 ----------------------------------------------------------------------------------
 -- AXI signals
-signal S_AXI_AWADDR                   :  std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0);
-signal S_AXI_AWVALID                  :  std_logic;
-signal S_AXI_WDATA                    :  std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
-signal S_AXI_WSTRB                    :  std_logic_vector((C_S00_AXI_DATA_WIDTH/8)-1 downto 0);
-signal S_AXI_WVALID                   :  std_logic;
-signal S_AXI_BREADY                   :  std_logic;
-signal S_AXI_ARADDR                   :  std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0);
-signal S_AXI_ARVALID                  :  std_logic;
-signal S_AXI_RREADY                   :  std_logic;
-signal S_AXI_ARREADY                  : std_logic;
-signal S_AXI_RDATA                    : std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
-signal S_AXI_RRESP                    : std_logic_vector(1 downto 0);
-signal S_AXI_RVALID                   : std_logic;
-signal S_AXI_WREADY                   : std_logic;
-signal S_AXI_BRESP                    : std_logic_vector(1 downto 0);
-signal S_AXI_BVALID                   : std_logic;
-signal S_AXI_AWREADY                  : std_logic;
-signal S_AXI_AWPROT                   : std_logic_vector(2 downto 0);
-signal S_AXI_ARPROT                   : std_logic_vector(2 downto 0);
+signal S_AXI_AWADDR                   :  std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0) := (others => '0');
+signal S_AXI_AWVALID                  :  std_logic := '0';
+signal S_AXI_WDATA                    :  std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0) := (others => '0');
+signal S_AXI_WSTRB                    :  std_logic_vector((C_S00_AXI_DATA_WIDTH/8)-1 downto 0) := (others => '0');
+signal S_AXI_WVALID                   :  std_logic := '0';
+signal S_AXI_BREADY                   :  std_logic := '0';
+signal S_AXI_ARADDR                   :  std_logic_vector(C_S00_AXI_ADDR_WIDTH-1 downto 0) := (others => '0');
+signal S_AXI_ARVALID                  :  std_logic := '0';
+signal S_AXI_RREADY                   :  std_logic := '0';
+signal S_AXI_ARREADY                  : std_logic := '0';
+signal S_AXI_RDATA                    : std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0) := (others => '0');
+signal S_AXI_RRESP                    : std_logic_vector(1 downto 0) := (others => '0');
+signal S_AXI_RVALID                   : std_logic := '0';
+signal S_AXI_WREADY                   : std_logic := '0';
+signal S_AXI_BRESP                    : std_logic_vector(1 downto 0) := (others => '0');
+signal S_AXI_BVALID                   : std_logic := '0';
+signal S_AXI_AWREADY                  : std_logic := '0';
+signal S_AXI_AWPROT                   : std_logic_vector(2 downto 0) := (others => '0');
+signal S_AXI_ARPROT                   : std_logic_vector(2 downto 0) := (others => '0');
 
 -- James signals
 signal dds_reset                      :  std_logic := '0';
 signal dds_enable                     :  std_logic := '1';
 signal lrclk                          :  std_logic := '0';
-signal left_data                      :  std_logic_vector(23 downto 0);
-signal right_data                     :  std_logic_vector(23 downto 0);
-signal left_phase                     :  std_logic_vector(11 downto 0);
-signal right_phase                    :  std_logic_vector(11 downto 0);
+--signal left_data                      :  std_logic_vector(23 downto 0);
+--signal right_data                     :  std_logic_vector(23 downto 0);
+--signal left_phase                     :  std_logic_vector(11 downto 0);
+--signal right_phase                    :  std_logic_vector(11 downto 0);
 
 ----------------------------------------------------------------------------------
 -- Testbench signals
-signal enable_send, enable_read : std_logic;
-signal axi_data_out : std_logic_vector(REG_DATA_WIDTH-1 downto 0);
-signal axi_data_write : std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
-signal data_select : std_logic_vector(C_S00_AXI_ADDR_WIDTH-3 downto 0);
+signal enable_send, enable_read : std_logic := '0';
+signal axi_data_out : std_logic_vector(REG_DATA_WIDTH-1 downto 0) := (others => '0');
+signal axi_data_write : std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0) := (others => '0');
+signal data_select : std_logic_vector(C_S00_AXI_ADDR_WIDTH-3 downto 0) := (others => '0');
 signal axi_reg : integer := 0;
-signal mute_n, bclk, mclk, data_in, data_out : std_logic;
+signal mute_n, bclk, mclk, data_out : std_logic := '0';
 signal reset_n : std_logic := '1';
 signal M_AXIS_TREADY, S_AXIS_TREADY : std_logic := '0';
-signal M_AXIS_TDATA, S_AXIS_TDATA : std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
-signal M_AXIS_TSTRB, S_AXIS_TSTRB : std_logic_vector((C_S00_AXI_DATA_WIDTH/8)-1 downto 0) := (others => '1');
+signal M_AXIS_TDATA, S_AXIS_TDATA : std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0) := (others => '0');
+signal M_AXIS_TSTRB, S_AXIS_TSTRB : std_logic_vector((C_S00_AXI_DATA_WIDTH/8)-1 downto 0) := (others => '0');
 signal M_AXIS_TLAST, S_AXIS_TLAST : std_logic := '0';
 signal M_AXIS_TVALID, S_AXIS_TVALID : std_logic := '0';
 
@@ -516,7 +516,7 @@ end process adc_clock_gen_process;
 ----------------------------------------------------------------------------
 stimulus : PROCESS
  BEGIN
-    fir_sel <= "000";
+    fir_sel <= "100";
     -- Initialize, reset
     reset_n <= '0';
     enable_send <= '0';
@@ -525,8 +525,10 @@ stimulus : PROCESS
     axi_data_write <= (others => '0');
     axi_reg <= 3;           -- we are writing to AXI register 0
     
-    wait for 4000 ns;
+    wait for 400 ns;
     reset_n <= '1';
+    
+    
     
     wait until rising_edge(clk);
     wait for CLOCK_PERIOD;
@@ -534,7 +536,7 @@ stimulus : PROCESS
     
     -- write data to register 0
     axi_reg <= 0;
-    axi_data_write <= std_logic_vector(to_unsigned(20,axi_data_write'LENGTH));
+    axi_data_write <= std_logic_vector(to_unsigned(10,axi_data_write'LENGTH));
     wait for 100 ns;
     master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
     wait for 100 ns;
@@ -549,10 +551,17 @@ stimulus : PROCESS
     
     -- write data to register 1
     axi_reg <= 1;
-    axi_data_write <= std_logic_vector(to_unsigned(40,axi_data_write'LENGTH));
+    axi_data_write <= std_logic_vector(to_unsigned(100,axi_data_write'LENGTH));
     wait for 100 ns;
     master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
     wait for 100 ns;
+    
+    
+    wait for 40000 ns;
+    fir_sel <= "000";
+    
+
+        
     
 --    -- read data written to register 1
 --    master_read_axi_reg(S_AXI_ARADDR, enable_read, axi_reg, S_AXI_RVALID);

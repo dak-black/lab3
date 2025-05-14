@@ -49,7 +49,7 @@ architecture Behavioral of axis_receiver is
 
 ----------------------------------------------------------------------------
 -- FSM states
-type state_type is (Idle, Ready, LReceive, RReceive, Hold);	
+type state_type is (Idle, Ready, LReceive, RReceive, ValidOut, Hold);	
 signal curr_state, next_state : state_type := Idle;
 
 begin
@@ -93,9 +93,16 @@ begin
 			if (s00_axis_aresetn = '0') then
 			    next_state <= Idle;
 			else     -- wait until enabled		   
-		        next_state <= Hold;
+		        next_state <= ValidOut;
             end if;
-            
+        
+        when ValidOut =>
+            if (s00_axis_aresetn = '0') then
+			    next_state <= Idle;
+            else
+                next_state <= Hold;
+            end if;
+                        
         when Hold => -- Wait for the next lrclk cycle, meaning stay still until lrclk goes low
             if (s00_axis_aresetn = '0') then
 			    next_state <= Idle;
@@ -135,8 +142,11 @@ begin
             
         when RReceive =>
 
-        when Hold =>
+        when ValidOut =>
 			lr_valid_o <= '1';
+
+        when Hold =>
+        
 		when others => -- this is like the "else" part of an if/else statement, but shouldn't reached
 			
     end case;					-- end of case statement
