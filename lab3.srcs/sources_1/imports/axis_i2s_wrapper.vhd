@@ -98,9 +98,10 @@ entity axis_i2s_wrapper is
 		
 		-- Debug ports (ILA)
 		dbg_left_audio_rx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
-		dbg_left_audio_tx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		left_dds_phase_inc_dbg_o : out std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
 		dbg_right_audio_rx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
-		dbg_right_audio_tx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0)
+		right_dds_phase_inc_dbg_o : out std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+		lrclk_dbg	: out std_logic
 
 		);
 end axis_i2s_wrapper;
@@ -195,18 +196,18 @@ end component;
 
 
 ----------------------------------------------------------------------------------
--- DDS audio tone generator
-component dds_controller is
-    Generic ( DDS_DATA_WIDTH : integer := AC_DATA_WIDTH;       -- DDS data width
-            PHASE_DATA_WIDTH : integer := PHASE_DATA_WIDTH);      -- DDS phase increment data width
-    Port ( 
-      clk_i         : in std_logic;
-      enable_i      : in std_logic;
-      reset_i       : in std_logic;
-      phase_inc_i   : in std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
+---- DDS audio tone generator
+--component dds_controller is
+--    Generic ( DDS_DATA_WIDTH : integer := AC_DATA_WIDTH;       -- DDS data width
+--            PHASE_DATA_WIDTH : integer := PHASE_DATA_WIDTH);      -- DDS phase increment data width
+--    Port ( 
+--      clk_i         : in std_logic;
+--      enable_i      : in std_logic;
+--      reset_i       : in std_logic;
+--      phase_inc_i   : in std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
       
-      data_o        : out std_logic_vector(DDS_DATA_WIDTH-1 downto 0)); 
-end component;
+--      data_o        : out std_logic_vector(DDS_DATA_WIDTH-1 downto 0)); 
+--end component;
 
 ----------------------------------------------------------------------------------
 -- AXI DDS
@@ -353,13 +354,13 @@ axis_dds : axi_dds
     port map (
         dds_clk_i                   => lrclk,
 		dds_enable_i                => dds_enable_i,
-		dds_reset_i                 => dds_reset_i,
+		dds_reset_i                 => not(dds_reset_i),
 		left_dds_data_o             => left_dds_data,
 		right_dds_data_o            => right_dds_data,
 		
 		-- Debug ports to send to ILA
-		left_dds_phase_inc_dbg_o    => left_phase_inc_debug,
-		right_dds_phase_inc_dbg_o   => right_phase_inc_debug,
+		left_dds_phase_inc_dbg_o    => left_dds_phase_inc_dbg_o,
+		right_dds_phase_inc_dbg_o   => right_dds_phase_inc_dbg_o,
 		
 		----------------------------------------------------------------------------
 		-- User ports ends
@@ -438,11 +439,11 @@ port map(
 
 -- Latch the debug signals to be observed in the ILA
 dbg_left_audio_rx_o <= left_dds_data;
-dbg_left_audio_tx_o <= left_axi_tx;
+--dbg_left_audio_tx_o <= left_axi_tx;
 dbg_right_audio_rx_o <= right_dds_data;
-dbg_right_audio_tx_o <= right_axi_tx;
+--dbg_right_audio_tx_o <= right_axi_tx;
 
-
+lrclk_dbg <= lrclk ;
 
 
 lrclk_o <= lrclk;
@@ -450,14 +451,14 @@ lrclk_o <= lrclk;
 -- Logic
 ---------------------------------------------------------------------------- 
 -- sets the low-active mute signal
-pass_mute: process(mclk)
-begin
-    if (rising_edge(mclk)) then
-        ac_mute_n_o <= not(ac_mute_en_i);
-    end if;
-end process pass_mute;
+--pass_mute: process(mclk)
+--begin
+--    if (rising_edge(mclk)) then
+--        ac_mute_n_o <= not(ac_mute_en_i);
+--    end if;
+--end process pass_mute;
 
-
+ac_mute_n_o <= '1';
 
 dds_codec_swap: process(sysclk_i)
 begin

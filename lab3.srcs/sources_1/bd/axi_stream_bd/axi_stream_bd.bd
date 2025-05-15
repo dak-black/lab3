@@ -24,9 +24,9 @@
         "m01_couplers": {}
       },
       "rst_ps7_0_125M": "",
+      "system_ila_0": "",
       "axis_i2s_wrapper_0": "",
-      "axis_fir_0": "",
-      "system_ila_0": ""
+      "axis_fir_0": ""
     },
     "interface_ports": {
       "DDR": {
@@ -2141,6 +2141,20 @@
         "xci_path": "ip\\axi_stream_bd_rst_ps7_0_125M_0\\axi_stream_bd_rst_ps7_0_125M_0.xci",
         "inst_hier_path": "rst_ps7_0_125M"
       },
+      "system_ila_0": {
+        "vlnv": "xilinx.com:ip:system_ila:1.1",
+        "xci_name": "axi_stream_bd_system_ila_0_0",
+        "xci_path": "ip\\axi_stream_bd_system_ila_0_0\\axi_stream_bd_system_ila_0_0.xci",
+        "inst_hier_path": "system_ila_0",
+        "parameters": {
+          "C_MON_TYPE": {
+            "value": "NATIVE"
+          },
+          "C_NUM_OF_PROBES": {
+            "value": "5"
+          }
+        }
+      },
       "axis_i2s_wrapper_0": {
         "vlnv": "xilinx.com:module_ref:axis_i2s_wrapper:1.0",
         "xci_name": "axi_stream_bd_axis_i2s_wrapper_0_0",
@@ -2660,9 +2674,9 @@
             "left": "23",
             "right": "0"
           },
-          "dbg_left_audio_tx_o": {
+          "left_dds_phase_inc_dbg_o": {
             "direction": "O",
-            "left": "23",
+            "left": "11",
             "right": "0"
           },
           "dbg_right_audio_rx_o": {
@@ -2670,10 +2684,13 @@
             "left": "23",
             "right": "0"
           },
-          "dbg_right_audio_tx_o": {
+          "right_dds_phase_inc_dbg_o": {
             "direction": "O",
-            "left": "23",
+            "left": "11",
             "right": "0"
+          },
+          "lrclk_dbg": {
+            "direction": "O"
           }
         }
       },
@@ -2909,20 +2926,6 @@
             }
           }
         }
-      },
-      "system_ila_0": {
-        "vlnv": "xilinx.com:ip:system_ila:1.1",
-        "xci_name": "axi_stream_bd_system_ila_0_0",
-        "xci_path": "ip\\axi_stream_bd_system_ila_0_0\\axi_stream_bd_system_ila_0_0.xci",
-        "inst_hier_path": "system_ila_0",
-        "parameters": {
-          "C_MON_TYPE": {
-            "value": "NATIVE"
-          },
-          "C_NUM_OF_PROBES": {
-            "value": "4"
-          }
-        }
       }
     },
     "interface_nets": {
@@ -3050,7 +3053,7 @@
       },
       "axis_i2s_wrapper_0_dbg_left_audio_tx_o": {
         "ports": [
-          "axis_i2s_wrapper_0/dbg_left_audio_tx_o",
+          "axis_i2s_wrapper_0/left_dds_phase_inc_dbg_o",
           "system_ila_0/probe1"
         ]
       },
@@ -3060,16 +3063,22 @@
           "system_ila_0/probe2"
         ]
       },
-      "axis_i2s_wrapper_0_dbg_right_audio_tx_o": {
+      "axis_i2s_wrapper_0_lrclk_dbg": {
         "ports": [
-          "axis_i2s_wrapper_0/dbg_right_audio_tx_o",
-          "system_ila_0/probe3"
+          "axis_i2s_wrapper_0/lrclk_dbg",
+          "system_ila_0/probe4"
         ]
       },
       "axis_i2s_wrapper_0_lrclk_o": {
         "ports": [
           "axis_i2s_wrapper_0/lrclk_o",
           "axis_fir_0/lrclk_i"
+        ]
+      },
+      "axis_i2s_wrapper_0_right_dds_phase_inc_dbg_o": {
+        "ports": [
+          "axis_i2s_wrapper_0/right_dds_phase_inc_dbg_o",
+          "system_ila_0/probe3"
         ]
       },
       "dds_enable_i_0_1": {
@@ -3098,13 +3107,13 @@
           "axi_interconnect_0/M00_ACLK",
           "axi_interconnect_0/ACLK",
           "axi_interconnect_0/M01_ACLK",
+          "system_ila_0/clk",
           "axis_i2s_wrapper_0/sysclk_i",
           "axis_i2s_wrapper_0/s00_axis_aclk",
           "axis_i2s_wrapper_0/m00_axis_aclk",
           "axis_i2s_wrapper_0/s00_axi_aclk",
           "axis_fir_0/s00_axis_aclk",
-          "axis_fir_0/m00_axis_aclk",
-          "system_ila_0/clk"
+          "axis_fir_0/m00_axis_aclk"
         ]
       },
       "processing_system7_0_FCLK_RESET0_N": {

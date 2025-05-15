@@ -342,8 +342,8 @@ receiver_inst : axis_receiver
 		m00_axis_tready      => m00_axis_tready,
 		
 		m00_axis_tdata       => filter_output,
-		m00_axis_tlast       => m00_axis_tlast,
-		m00_axis_tstrb       => m00_axis_tstrb,
+		m00_axis_tlast       => open,
+		m00_axis_tstrb       => open,
 		m00_axis_tvalid      => valid_o,
 		s_ready           => 	s_ready
 		);
