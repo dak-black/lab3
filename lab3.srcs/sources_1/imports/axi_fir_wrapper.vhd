@@ -65,6 +65,8 @@ signal data_l_i: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_r_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_l_o: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
+signal valid_o          : std_logic := '0';
+
 signal lpf_r_valid          : std_logic := '0';
 signal lpf_l_valid          : std_logic := '0';
 
@@ -118,12 +120,16 @@ signal s_ready            : std_logic := '0';
 
 signal lr_valid_i         :  std_logic := '0';
 
+
+
 signal filter_output    : std_logic_vector(AXI_WIDTH-1 downto 0) := (others => '0');
 
 
 ----------------------------------------------------------------------------
 -- Component Declarations
 ----------------------------------------------------------------------------  
+
+
 component  axis_receiver 
     port (
     	lrclk_i              : in std_logic;
@@ -156,18 +162,6 @@ component axis_transmitter
 		m00_axis_tvalid      : out std_logic;
 		s_ready           : out std_logic	
 		);
-end component;
-
-component fir_for_sim is
-  Port ( 
-    aclk : in STD_LOGIC;
-    s_axis_data_tvalid : in STD_LOGIC;
-    s_axis_data_tready : out STD_LOGIC;
-    s_axis_data_tdata : in STD_LOGIC_VECTOR ( 23 downto 0 );
-    m_axis_data_tvalid : out STD_LOGIC;
-    m_axis_data_tready : in STD_LOGIC;
-    m_axis_data_tdata : out STD_LOGIC_VECTOR ( 23 downto 0 )
-  );
 end component;
 
 component fir_lpf_0
@@ -227,6 +221,8 @@ m00_axis_tlast <= s00_axis_tlast;
 ----------------------------------------------------------------------------
 -- Component Instantiations
 ----------------------------------------------------------------------------   
+
+
 lpf_l_inst : fir_lpf_0
   port map (
     aclk => s00_axis_aclk,
@@ -348,7 +344,7 @@ receiver_inst : axis_receiver
 		m00_axis_tdata       => filter_output,
 		m00_axis_tlast       => m00_axis_tlast,
 		m00_axis_tstrb       => m00_axis_tstrb,
-		m00_axis_tvalid      => m00_axis_tvalid,
+		m00_axis_tvalid      => valid_o,
 		s_ready           => 	s_ready
 		);
    
@@ -359,7 +355,11 @@ receiver_inst : axis_receiver
 filter_select: process(s00_axis_aclk)
 begin
     if rising_edge(s00_axis_aclk) then
-        if fir_sel_i(1) = '0' then 
+        if fir_sel_i(2) = '1' then
+            data_l_o <= data_l_i;
+            data_r_o <= data_r_i;
+        
+        else if fir_sel_i(1) = '0' then 
             if fir_sel_i(0) = '0' then
                 lpf_l_ready <= s_ready; 
                 if lpf_l_valid = '1' then
@@ -382,8 +382,8 @@ begin
             end if;
         else
             if fir_sel_i(0) = '0' then
-                if bpf_l_valid = '1' then
                 bpf_l_ready <= s_ready;                
+                if bpf_l_valid = '1' then
                     data_l_o <= data_bpf_l_o ;
                 end if;
                 
@@ -398,11 +398,12 @@ begin
                 end if;    
                 
                 bsf_r_ready <= s_ready;
-                if bsf_l_valid = '1' then
+                if bsf_r_valid = '1' then
                     data_r_o <= data_bsf_r_o ;
                 end if;            
             end if; 
        end if;
+     end if;
    end if; 
        
 end process filter_select;
@@ -410,11 +411,8 @@ end process filter_select;
 filter_activate: process(s00_axis_aclk)
 begin
     if rising_edge(s00_axis_aclk) then
-         if fir_sel_i(2) = '1' then 
-            m00_axis_tdata <= s00_axis_tdata;                  
-         else
-            m00_axis_tdata <= filter_output;
-         end if;
+        m00_axis_tvalid <= valid_o;
+        m00_axis_tdata <= filter_output;    
    end if; 
        
 end process filter_activate;

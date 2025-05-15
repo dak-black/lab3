@@ -91,6 +91,9 @@ signal lrclk                          :  std_logic := '0';
 signal enable_send, enable_read : std_logic := '0';
 signal axi_data_out : std_logic_vector(REG_DATA_WIDTH-1 downto 0) := (others => '0');
 signal axi_data_write : std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0) := (others => '0');
+
+signal sample_data : std_logic := '0';
+
 signal data_select : std_logic_vector(C_S00_AXI_ADDR_WIDTH-3 downto 0) := (others => '0');
 signal axi_reg : integer := 0;
 signal mute_n, bclk, mclk, data_out : std_logic := '0';
@@ -135,7 +138,7 @@ component axis_i2s_wrapper is
         ac_dac_lrclk_o : out STD_LOGIC;
         
         -- Audio Codec ADC (audio in)
---        ac_adc_data_i : in STD_LOGIC;
+        ac_adc_data_i : in STD_LOGIC;
         ac_adc_lrclk_o : out STD_LOGIC;
         
         ----------------------------------------------------------------------------
@@ -325,7 +328,7 @@ axis_i2s : axis_i2s_wrapper
         ac_dac_lrclk_o                => open,
         
         -- Audio Codec ADC (audio in)
---        ac_adc_data_i                => s00_axi_aclk, -- REVISIT: uncomment when receiver is brought back
+        ac_adc_data_i                => sample_data, -- REVISIT: uncomment when receiver is brought back
         ac_adc_lrclk_o                => lrclk,
         
         ----------------------------------------------------------------------------
@@ -536,7 +539,7 @@ stimulus : PROCESS
     
     -- write data to register 0
     axi_reg <= 0;
-    axi_data_write <= std_logic_vector(to_unsigned(10,axi_data_write'LENGTH));
+    axi_data_write <= std_logic_vector(to_unsigned(100,axi_data_write'LENGTH));
     wait for 100 ns;
     master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
     wait for 100 ns;
@@ -551,14 +554,14 @@ stimulus : PROCESS
     
     -- write data to register 1
     axi_reg <= 1;
-    axi_data_write <= std_logic_vector(to_unsigned(100,axi_data_write'LENGTH));
+    axi_data_write <= std_logic_vector(to_unsigned(500,axi_data_write'LENGTH));
     wait for 100 ns;
     master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
     wait for 100 ns;
     
     
     wait for 40000 ns;
-    fir_sel <= "000";
+    --fir_sel <= "000";
     
 
         

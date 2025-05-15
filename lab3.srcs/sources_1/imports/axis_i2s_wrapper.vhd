@@ -10,7 +10,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;     
-use IEEE.STD_LOGIC_UNSIGNED.ALL;                                    
+use IEEE.STD_LOGIC_UNSIGNED.ALL; 
+
+library UNISIM;
+use UNISIM.VComponents.all;                                   
 ----------------------------------------------------------------------------
 -- Entity definition
 entity axis_i2s_wrapper is
@@ -31,7 +34,7 @@ entity axis_i2s_wrapper is
 		-- User controls
 		ac_mute_en_i : in STD_LOGIC;
 		dds_reset_i : in STD_LOGIC;
-		dds_enable_i  : in STD_LOGIC;
+		dds_enable_i  : in STD_LOGIC;		
 
 		-- Audio Codec I2S controls
         ac_bclk_o : out STD_LOGIC;
@@ -43,8 +46,11 @@ entity axis_i2s_wrapper is
         ac_dac_lrclk_o : out STD_LOGIC;
         
         -- Audio Codec ADC (audio in)
---        ac_adc_data_i : in STD_LOGIC;
+        ac_adc_data_i : in STD_LOGIC;
         ac_adc_lrclk_o : out STD_LOGIC;
+        
+        
+        lrclk_o : out STD_LOGIC;
         
         ----------------------------------------------------------------------------
         -- AXI Stream Interface (Receiver/Responder)
@@ -106,14 +112,23 @@ architecture Behavioral of axis_i2s_wrapper is
 signal mclk : std_logic := '0';
 signal bclk : std_logic := '0';
 signal lrclk: std_logic := '0';
+
+
+
 signal left_rx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal right_rx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 
-signal left_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
-signal right_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal left_axi_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal right_axi_tx: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+
+signal left_tx_data: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal right_tx_data: std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 
 --signal phase_inc_left : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
 --signal phase_inc_right : std_logic_vector(PHASE_DATA_WIDTH-1 downto 0); --not used
+
+signal left_in_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+signal right_in_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 
 signal left_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 signal right_dds_data : std_logic_vector(AC_DATA_WIDTH-1 downto 0);
@@ -321,18 +336,18 @@ port map(
 
 -- ATTACHING DDS INSTEAD
 
------------------------------------------------------------------------------- 
----- I2S receiver
---receiver: i2s_receiver
---    port map (
---		mclk_i                => mclk,
---        bclk_i                => bclk,	
---		lrclk_i               => lrclk,
---		left_audio_data_o     => left_rx,
---		right_audio_data_o    => right_rx,
---		adc_serial_data_i     => ac_adc_data_i); -- CHANGED TO CUT OFF RECIEVER (easier than switching others)
+-------------------------------------------------------------------------- 
+-- I2S receiver
+receiver: i2s_receiver
+    port map (
+		mclk_i                => mclk,
+        bclk_i                => bclk,	
+		lrclk_i               => lrclk,
+		left_audio_data_o     => left_rx,
+		right_audio_data_o    => right_rx,
+		adc_serial_data_i     => ac_adc_data_i); -- CHANGED TO CUT OFF RECIEVER (easier than switching others)
 	
----------------------------------------------------------------------------- 
+-------------------------------------------------------------------------- 
 
 axis_dds : axi_dds
     port map (
@@ -381,8 +396,8 @@ port map(
     mclk_i              => mclk,
     bclk_i              => bclk,
     lrclk_i             => lrclk,
-    left_audio_data_i   => left_tx,		-- REMEMBER: CHANGE BACK TO LEFT_AUDIO_DATA_TX
-    right_audio_data_i  => right_tx,
+    left_audio_data_i   => left_tx_data,		-- REMEMBER: CHANGE BACK TO LEFT_AUDIO_DATA_TX
+    right_audio_data_i  => right_tx_data,
     dac_serial_data_o   => ac_dac_data_o);		-- DUT output
 
 ---------------------------------------------------------------------------- 
@@ -393,8 +408,8 @@ port map(
     lrclk_i             => lrclk,           
     m00_axis_aclk       => m00_axis_aclk,
     m00_axis_aresetn    => m00_axis_aresetn,
-    left_audio_data_i   => left_dds_data,
-    right_audio_data_i  => right_dds_data,
+    left_audio_data_i   => left_axi_tx,
+    right_audio_data_i  => right_axi_tx,
     m00_axis_tready     => m00_axis_tready,
     
     m00_axis_tdata      => m00_axis_tdata,
@@ -417,16 +432,20 @@ port map(
     s00_axis_tvalid     => s00_axis_tvalid,
     
     s00_axis_tready     => s00_axis_tready,
-    left_audio_data_o   => left_tx,
-    right_audio_data_o  => right_tx
+    left_audio_data_o   => left_tx_data,
+    right_audio_data_o  => right_tx_data
 );
 
 -- Latch the debug signals to be observed in the ILA
 dbg_left_audio_rx_o <= left_dds_data;
-dbg_left_audio_tx_o <= left_tx;
+dbg_left_audio_tx_o <= left_axi_tx;
 dbg_right_audio_rx_o <= right_dds_data;
-dbg_right_audio_tx_o <= right_tx;
+dbg_right_audio_tx_o <= right_axi_tx;
 
+
+
+
+lrclk_o <= lrclk;
 ---------------------------------------------------------------------------- 
 -- Logic
 ---------------------------------------------------------------------------- 
@@ -439,6 +458,21 @@ begin
 end process pass_mute;
 
 
+
+dds_codec_swap: process(sysclk_i)
+begin
+    if (falling_edge(sysclk_i)) then
+        if (dds_enable_i = '1') then
+            left_axi_tx <= left_dds_data;
+            right_axi_tx <= right_dds_data;
+           
+        else
+            left_axi_tx <= left_rx;
+            right_axi_tx <= right_rx;
+        end if;
+    end if;
+        
+end process dds_codec_swap;
 ----------------------------------------------------------------------------
 
 
