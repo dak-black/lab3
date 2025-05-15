@@ -1,0 +1,6 @@
+2025-05-15T16:20:59.712094500255-16:20:59 **** Incremental Build of project axi_stream_bd_wrapper ****
+000-buildplatform.bat 51499 axi_stream_bd_wrapper no_domain_build 
+000-XSDB Server Channel: tcfchan#1
+00255-
+16:21:16 Build Finished (took 16s.421ms)
+

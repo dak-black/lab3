@@ -1,0 +1,10 @@
+16:21:25 **** Incremental Build of configuration Debug for project lab3_sw_system ****
+make all 
+Generating bif file for the system project
+generate_system_bif.bat 51499 O:/ENGS128/lab3/axi_stream_bd_wrapper/export/axi_stream_bd_wrapper/axi_stream_bd_wrapper.xpfm standalone_ps7_cortexa9_0 O:/ENGS128/lab3/lab3_sw_system/Debug/system.bif
+sdcard_gen --xpfm O:/ENGS128/lab3/axi_stream_bd_wrapper/export/axi_stream_bd_wrapper/axi_stream_bd_wrapper.xpfm --sys_config axi_stream_bd_wrapper --bif O:/ENGS128/lab3/lab3_sw_system/Debug/system.bif --bitstream O:/ENGS128/lab3/lab3_sw/_ide/bitstream/axi_stream_bd_wrapper.bit --elf O:/ENGS128/lab3/lab3_sw/Debug/lab3_sw.elf,ps7_cortexa9_0
+creating BOOT.BIN using O:/ENGS128/lab3/lab3_sw/_ide/bitstream/axi_stream_bd_wrapper.bit
+Running C:/Xilinx/Vitis/2021.2/bin/bootgen  -image O:/ENGS128/lab3/lab3_sw_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN
+
+16:21:33 Build Finished (took 7s.770ms)
+

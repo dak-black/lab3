@@ -187,9 +187,9 @@ component axis_i2s_wrapper is
 		
 		-- Debug ports (ILA)
 		dbg_left_audio_rx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
-		dbg_left_audio_tx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
+		left_dds_phase_inc_dbg_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
 		dbg_right_audio_rx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0);
-		dbg_right_audio_tx_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0)
+		right_dds_phase_inc_dbg_o : out std_logic_vector(AC_DATA_WIDTH-1 downto 0)
 
 		);
 end component;
@@ -560,8 +560,8 @@ stimulus : PROCESS
     wait for 100 ns;
     
     
-    wait for 40000 ns;
-    --fir_sel <= "000";
+    wait for 20000 ns;
+    fir_sel <= "000";
     
 
         
