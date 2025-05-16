@@ -354,7 +354,7 @@ axis_dds : axi_dds
     port map (
         dds_clk_i                   => lrclk,
 		dds_enable_i                => dds_enable_i,
-		dds_reset_i                 => not(dds_reset_i),
+		dds_reset_i                 => '0',
 		left_dds_data_o             => left_dds_data,
 		right_dds_data_o            => right_dds_data,
 		

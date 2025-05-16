@@ -522,6 +522,7 @@ stimulus : PROCESS
     fir_sel <= "100";
     -- Initialize, reset
     reset_n <= '0';
+    dds_enable <= '1';
     enable_send <= '0';
     enable_read <= '0';
     data_select <= (others => '0');
@@ -560,7 +561,7 @@ stimulus : PROCESS
     wait for 100 ns;
     
     
-    wait for 20000 ns;
+    wait for 150000 ns;
     fir_sel <= "000";
     
 

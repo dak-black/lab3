@@ -37,9 +37,8 @@ entity axis_transmitter is
 		m00_axis_tdata       : out std_logic_vector(FIFO_WIDTH-1 downto 0);
 		m00_axis_tlast       : out std_logic := '0';
 		m00_axis_tstrb       : out std_logic_vector(3 downto 0) := (others => '0');
-		m00_axis_tvalid      : out std_logic;
+		m00_axis_tvalid      : out std_logic
 		
-		s_ready           : out std_logic := '0'
 	);
 end axis_transmitter;
 
@@ -117,7 +116,7 @@ begin
     -- ++++ Set defaults at the top, and use a CASE statement ++++ 
 	-- Defaults
 	m00_axis_tvalid <= '0'; 
-	s_ready <= '0';		
+	m00_axis_tlast <= '0';		
 
     -- Use a case statement to switch between states
     case curr_state is	
@@ -133,7 +132,7 @@ begin
 		when Hold =>
 		
 		when ReadyOut => 
-		  s_ready <= '1';	
+		  m00_axis_tlast <= '1';	
 			
 		when others => -- this is like the "else" part of an if/else statement, but shouldn't reached
 			
