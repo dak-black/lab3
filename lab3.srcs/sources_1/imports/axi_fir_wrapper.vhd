@@ -48,88 +48,88 @@ end axis_fir;
 architecture Behavioral of axis_fir is
 ----------------------------------------------------------------------------
 -- Signals
-----------------------------------------------------------------------------  
+---------------------------------------------------------------------------- 
+-- These signals store the data output by the various filters 
+-- Left
 signal data_lpf_l: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_hpf_l: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_bpf_l: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_bsf_l: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
+-- Right
 signal data_lpf_r: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_hpf_r: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_bpf_r: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal data_bsf_r: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
+-- Data output by the AXI receiver
 signal axi_rx_r_data: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal axi_rx_l_data: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
+-- Data output by the AXI transmitter
 signal axi_tx_r_data: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 signal axi_tx_l_data: std_logic_vector(FIR_WIDTH-1 downto 0) := (others => '0');
 
+-- Indicates valid data output by the transmitter
 signal valid_o          : std_logic := '0';
 
+-- Indicates valid data output by the filters
 signal lpf_r_valid          : std_logic := '0';
 signal lpf_l_valid          : std_logic := '0';
-
 signal hpf_r_valid          : std_logic := '0';
 signal hpf_l_valid          : std_logic := '0';
-
 signal bpf_r_valid          : std_logic := '0';
 signal bpf_l_valid          : std_logic := '0';
-
 signal bsf_r_valid          : std_logic := '0';
 signal bsf_l_valid          : std_logic := '0';
 
+-- Indicates valid data input into the filters
 signal slpf_r_valid          : std_logic := '0';
 signal slpf_l_valid          : std_logic := '0';
-
 signal shpf_r_valid          : std_logic := '0';
 signal shpf_l_valid          : std_logic := '0';
-
 signal sbpf_r_valid          : std_logic := '0';
 signal sbpf_l_valid          : std_logic := '0';
-
 signal sbsf_r_valid          : std_logic := '0';
 signal sbsf_l_valid          : std_logic := '0';
 
+-- Indicates that the AXI transmitter is ready to receive filter data
 signal lpf_r_ready          : std_logic := '0';
 signal lpf_l_ready          : std_logic := '0';
-
 signal hpf_r_ready          : std_logic := '0';
 signal hpf_l_ready          : std_logic := '0';
-
 signal bpf_r_ready          : std_logic := '0';
 signal bpf_l_ready          : std_logic := '0';
-
 signal bsf_r_ready          : std_logic := '0';
 signal bsf_l_ready          : std_logic := '0';
 
+-- Indicates that the filter is ready to receive data from the AXI receiver
 signal slpf_r_ready          : std_logic := '0';
 signal slpf_l_ready          : std_logic := '0';
-
 signal shpf_r_ready          : std_logic := '0';
 signal shpf_l_ready          : std_logic := '0';
-
 signal sbpf_r_ready          : std_logic := '0';
 signal sbpf_l_ready          : std_logic := '0';
-
 signal sbsf_r_ready          : std_logic := '0';
 signal sbsf_l_ready          : std_logic := '0';
 
+-- Indicates that the AXI receiver is ready
 signal recv_ready            : std_logic := '0';
+
+-- Indicates that a filter should be enabled
 signal filter_en            : std_logic := '0';
 
-signal lr_valid_i         :  std_logic := '0';
+-- Indicates that the AXI receiver's data is valid
+signal lr_valid         :  std_logic := '0';
 
-
-
+-- Stores the data output either by the filter or the AXI receiver when filters are deactivated
 signal filter_output    : std_logic_vector(AXI_WIDTH-1 downto 0) := (others => '0');
 
 
 ----------------------------------------------------------------------------
 -- Component Declarations
 ----------------------------------------------------------------------------  
-
-
+-- AXI Receiver
 component  axis_receiver 
     port (
     	lrclk_i              : in std_logic;
@@ -147,6 +147,7 @@ component  axis_receiver
 	);
 	end component;
 	
+-- AXI Transmitter
 component axis_transmitter
     port( 
         lrclk_i              : in std_logic;
@@ -163,6 +164,7 @@ component axis_transmitter
 		);
 end component;
 
+-- Low-pass filter
 component fir_lpf_0
   port (
     aclk : IN STD_LOGIC;
@@ -175,6 +177,7 @@ component fir_lpf_0
   );
 end component;
 
+-- High-pass filter
 component fir_hpf_0
   port (
     aclk : IN STD_LOGIC;
@@ -187,6 +190,7 @@ component fir_hpf_0
   );
 end component;
 
+-- Band-pass filter
 component fir_bpf_0
   port (
     aclk : IN STD_LOGIC;
@@ -199,6 +203,7 @@ component fir_bpf_0
   );
 end component;
 
+-- Band-stop filter
 component fir_bsf_0
   port (
     aclk : IN STD_LOGIC;
@@ -220,8 +225,7 @@ m00_axis_tlast <= s00_axis_tlast;
 ----------------------------------------------------------------------------
 -- Component Instantiations
 ----------------------------------------------------------------------------   
-
-
+-- Low-pass filter for left data
 lpf_l_inst : fir_lpf_0
   port map (
     aclk => s00_axis_aclk,
@@ -232,7 +236,8 @@ lpf_l_inst : fir_lpf_0
     m_axis_data_tready => lpf_l_ready,
     m_axis_data_tdata => data_lpf_l
   );
-  
+
+-- Low-pass filter for right data
 lpf_r_inst : fir_lpf_0
   port map (
     aclk => s00_axis_aclk,
@@ -244,7 +249,7 @@ lpf_r_inst : fir_lpf_0
     m_axis_data_tdata => data_lpf_r
   );
 
-
+-- High-pass filter for left data
 hpf_l_inst : fir_hpf_0
   port map (
     aclk => s00_axis_aclk,
@@ -255,7 +260,8 @@ hpf_l_inst : fir_hpf_0
     m_axis_data_tready => hpf_l_ready,
     m_axis_data_tdata => data_hpf_l
   );
-  
+
+-- High-pass filter for right data
   hpf_r_inst : fir_hpf_0
   port map (
     aclk => s00_axis_aclk,
@@ -266,7 +272,8 @@ hpf_l_inst : fir_hpf_0
     m_axis_data_tready => hpf_r_ready,
     m_axis_data_tdata => data_hpf_r
   );
-  
+
+-- Band-pass filter for left data
   bpf_l_inst : fir_bpf_0
   port map (
     aclk => s00_axis_aclk,
@@ -277,7 +284,8 @@ hpf_l_inst : fir_hpf_0
     m_axis_data_tready => bpf_l_ready,
     m_axis_data_tdata => data_bpf_l
   );
-  
+ 
+ -- Band-pass filter for right data 
 bpf_r_inst : fir_bpf_0
   port map (
     aclk => s00_axis_aclk,
@@ -288,7 +296,8 @@ bpf_r_inst : fir_bpf_0
     m_axis_data_tready => bpf_r_ready,
     m_axis_data_tdata => data_bpf_r
   );
-  
+
+-- Band-stop filter for left data
   bsf_l_inst : fir_bsf_0
   port map (
     aclk => s00_axis_aclk,
@@ -300,7 +309,7 @@ bpf_r_inst : fir_bpf_0
     m_axis_data_tdata => data_bsf_l
   );
 
-
+-- Band-stop filter for right data
 bsf_r_inst : fir_bsf_0
   port map (
     aclk => s00_axis_aclk,
@@ -312,10 +321,11 @@ bsf_r_inst : fir_bsf_0
     m_axis_data_tdata => data_bsf_r
   );
 
+-- Internal AXI receiver
 receiver_inst : axis_receiver
     port map (
 		lrclk_i              => lrclk_i,
-		lr_valid_o           => lr_valid_i,
+		lr_valid_o           => lr_valid,
 		s00_axis_aclk        => s00_axis_aclk,
 		s00_axis_tdata       => s00_axis_tdata,
 		s00_axis_aresetn     => s00_axis_aresetn,
@@ -329,8 +339,7 @@ receiver_inst : axis_receiver
 		
    ); 
    
-   
-   
+-- Internal AXI transmitter
  transmitter_inst :  axis_transmitter
     port map( 
         lrclk_i              => lrclk_i,
@@ -347,13 +356,12 @@ receiver_inst : axis_receiver
 		);
    
    
--- Logic 
-
-
+-- Logic -------------------------------------------------------
+-- Determines which filter to pass data to
 filter_select: process(s00_axis_aclk)
 begin
     if rising_edge(s00_axis_aclk) then
-        lpf_l_ready <= '0';
+        lpf_l_ready <= '0'; -- Defaults all filters to off
         lpf_r_ready <= '0';
         hpf_l_ready <= '0';
         hpf_l_ready <= '0';
@@ -372,30 +380,30 @@ begin
         sbsf_l_valid <= '0';
         
         
-        if fir_sel_i(2) = '1' then
+        if fir_sel_i(2) = '1' then -- If in pass through mode, pass through
             axi_tx_l_data <= axi_rx_l_data;
             axi_tx_r_data <= axi_rx_r_data;
         
-        else if fir_sel_i(1) = '0' then 
+        else if fir_sel_i(1) = '0' then -- Otherwise, decide which filter to use based on switches
             if fir_sel_i(0) = '0' then
-                lpf_l_ready <= filter_en;
-                slpf_l_valid <= lr_valid_i; 
+                lpf_l_ready <= filter_en; -- If the AXI transmitter is ready, pass data to it
+                slpf_l_valid <= lr_valid; -- If AXI receiver data is good, input data
                 if lpf_l_valid = '1' then
-                    axi_tx_l_data <= data_lpf_l ;
+                    axi_tx_l_data <= data_lpf_l ; -- If output data is valid, update the data through
                 end if;
-                lpf_r_ready <= filter_en;
-                slpf_r_valid <= lr_valid_i; 
+                lpf_r_ready <= filter_en; -- Same idea for all other switch combinations
+                slpf_r_valid <= lr_valid; 
 
                 if lpf_r_valid = '1' then
                     axi_tx_r_data <= data_lpf_r ;
                 end if;
             else
                 hpf_l_ready <= filter_en;
-                shpf_l_valid <= lr_valid_i; 
+                shpf_l_valid <= lr_valid; 
                 if hpf_l_valid = '1' then
                     axi_tx_l_data <= data_hpf_l ;
                 end if;
-                shpf_r_valid <= lr_valid_i; 
+                shpf_r_valid <= lr_valid; 
                  hpf_r_ready <= filter_en;               
                 if hpf_r_valid = '1' then
                     axi_tx_r_data <= data_hpf_r ; 
@@ -404,24 +412,24 @@ begin
             end if;
         else
             if fir_sel_i(0) = '0' then
-                sbpf_l_valid <= lr_valid_i; 
+                sbpf_l_valid <= lr_valid; 
                 bpf_l_ready <= filter_en;                
                 if bpf_l_valid = '1' then
                     axi_tx_l_data <= data_bpf_l ;
                 end if;
-                sbpf_r_valid <= lr_valid_i; 
+                sbpf_r_valid <= lr_valid; 
                 bpf_r_ready <= filter_en;
                 if bpf_r_valid = '1' then
                     axi_tx_r_data <= data_bpf_r ;               
                 end if;
             else
-                sbsf_l_valid <= lr_valid_i; 
+                sbsf_l_valid <= lr_valid; 
                 bsf_l_ready <= filter_en;
                 if bsf_l_valid = '1' then
                     axi_tx_l_data <= data_bsf_l ;
                 end if;    
                 
-                sbsf_r_valid <= lr_valid_i; 
+                sbsf_r_valid <= lr_valid; 
                 bsf_r_ready <= filter_en;
                 if bsf_r_valid = '1' then
                     axi_tx_r_data <= data_bsf_r ;
@@ -433,6 +441,7 @@ begin
        
 end process filter_select;
 
+-- Passes the valid signal and selected data out of the AXI transmitter
 filter_activate: process(s00_axis_aclk)
 begin
     if rising_edge(s00_axis_aclk) then
@@ -442,6 +451,7 @@ begin
        
 end process filter_activate;
 
+-- Determines when the overall wrapper is ready to receive data, strictly based on AXI transmitter
 ready_handler: process(s00_axis_aclk )
 begin
     if rising_edge(s00_axis_aclk ) then

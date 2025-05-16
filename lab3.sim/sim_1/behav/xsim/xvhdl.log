@@ -1,2 +1,8 @@
+INFO: [VRFC 10-163] Analyzing VHDL file "O:/ENGS128/lab3/lab3.srcs/sources_1/imports/axi_dds.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'axi_dds'
+INFO: [VRFC 10-163] Analyzing VHDL file "O:/ENGS128/lab3/lab3.srcs/sources_1/imports/axi_fir_wrapper.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'axis_fir'
+INFO: [VRFC 10-163] Analyzing VHDL file "O:/ENGS128/lab3/lab3.srcs/sources_1/imports/axis_i2s_wrapper.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'axis_i2s_wrapper'
 INFO: [VRFC 10-163] Analyzing VHDL file "O:/ENGS128/lab3/lab3.srcs/sim_1/new/tb_fir_top_level.vhd" into library xil_defaultlib
 INFO: [VRFC 10-3107] analyzing entity 'tb_fir_top_level'

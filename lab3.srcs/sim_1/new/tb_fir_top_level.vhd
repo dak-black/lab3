@@ -1,8 +1,8 @@
 ----------------------------------------------------------------------------
---  Lab 2: AXI Stream FIFO and DMA
+--  Lab 3: Digital Signal Processing
 ----------------------------------------------------------------------------
 --  ENGS 128 Spring 2025
---	Author: Kendall Farnham
+--	Author: James Quirk
 ----------------------------------------------------------------------------
 --	Description: Testbench for FIFO --> FIFO AXI stream passthrough
 ----------------------------------------------------------------------------
@@ -77,14 +77,10 @@ signal S_AXI_AWREADY                  : std_logic := '0';
 signal S_AXI_AWPROT                   : std_logic_vector(2 downto 0) := (others => '0');
 signal S_AXI_ARPROT                   : std_logic_vector(2 downto 0) := (others => '0');
 
--- James signals
+-- DDS signals
 signal dds_reset                      :  std_logic := '0';
 signal dds_enable                     :  std_logic := '1';
 signal lrclk                          :  std_logic := '0';
---signal left_data                      :  std_logic_vector(23 downto 0);
---signal right_data                     :  std_logic_vector(23 downto 0);
---signal left_phase                     :  std_logic_vector(11 downto 0);
---signal right_phase                    :  std_logic_vector(11 downto 0);
 
 ----------------------------------------------------------------------------------
 -- Testbench signals
@@ -519,6 +515,7 @@ end process adc_clock_gen_process;
 ----------------------------------------------------------------------------
 stimulus : PROCESS
  BEGIN
+    -- TEST 1: Verify correct pass-through
     fir_sel <= "100";
     -- Initialize, reset
     reset_n <= '0';
@@ -532,73 +529,36 @@ stimulus : PROCESS
     wait for 400 ns;
     reset_n <= '1';
     
-    
-    
+    -- BEGIN TEST
     wait until rising_edge(clk);
     wait for CLOCK_PERIOD;
-    
-    
+
     -- write data to register 0
     axi_reg <= 0;
-    axi_data_write <= std_logic_vector(to_unsigned(100,axi_data_write'LENGTH));
+    axi_data_write <= std_logic_vector(to_unsigned(100,axi_data_write'LENGTH)); -- We set the left phase increment to 100
     wait for 100 ns;
     master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
     wait for 100 ns;
-    
-    
-    -- read data written to register 0
+        
+    -- read data written to register 0 to verify correct value
     master_read_axi_reg(S_AXI_ARADDR, enable_read, axi_reg, S_AXI_RVALID);
-    
-    
     
     wait for 100 ns;
     
     -- write data to register 1
     axi_reg <= 1;
-    axi_data_write <= std_logic_vector(to_unsigned(500,axi_data_write'LENGTH));
+    axi_data_write <= std_logic_vector(to_unsigned(500,axi_data_write'LENGTH)); -- We set the right phase increment to 500
     wait for 100 ns;
     master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
     wait for 100 ns;
     
     
     wait for 150000 ns;
+    
+    -- TEST 2: CORRECT FILTERING
+    
     fir_sel <= "000";
     
-
-        
-    
---    -- read data written to register 1
---    master_read_axi_reg(S_AXI_ARADDR, enable_read, axi_reg, S_AXI_RVALID);
---    wait for 100 ns;
-    
---    -- write data to register 8
---    axi_reg <= 8;
---    axi_data_write <= std_logic_vector(to_unsigned(2,axi_data_write'LENGTH));
---    wait for 100 ns;
---    master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
---    wait for 100 ns;
-    
---    -- read data written to register 8
---    master_read_axi_reg(S_AXI_ARADDR, enable_read, axi_reg, S_AXI_RVALID);
---    wait for 100 ns;
-    
---    -- cycle through select bits
---    data_select <= std_logic_vector(to_unsigned(1,data_select'LENGTH));
---    wait for 100 ns;
---    data_select <= std_logic_vector(to_unsigned(2,data_select'LENGTH));
---    wait for 100 ns;
-    
-        
---    -- write data to register 15
---    data_select <= (others => '1');
---    axi_reg <= 15;
---    axi_data_write <= std_logic_vector(to_unsigned(4,axi_data_write'LENGTH));
---    wait for 100 ns;
---    master_write_axi_reg(S_AXI_AWADDR, S_AXI_WDATA, S_AXI_WSTRB, enable_send, axi_reg, axi_data_write, S_AXI_BVALID);
---    wait for 100 ns;
-    
---    -- read data written to register 15
---    master_read_axi_reg(S_AXI_ARADDR, enable_read, axi_reg, S_AXI_RVALID);
     wait;
     
         

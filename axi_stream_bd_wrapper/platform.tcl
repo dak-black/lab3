@@ -39,3 +39,9 @@ platform generate -domains
 platform active {axi_stream_bd_wrapper}
 platform config -updatehw {O:/ENGS128/lab3/axi_stream_bd_wrapper.xsa}
 platform generate -domains 
+platform active {axi_stream_bd_wrapper}
+platform config -updatehw {O:/ENGS128/lab3/axi_stream_bd_wrapper.xsa}
+platform config -updatehw {O:/ENGS128/lab3/axi_stream_bd_wrapper.xsa}
+platform active {axi_stream_bd_wrapper}
+platform config -updatehw {O:/ENGS128/lab3/axi_stream_bd_wrapper.xsa}
+platform generate

@@ -657,3 +657,86 @@ con
 ----------------End of Script----------------
 
 16:21:53 INFO  : Launch script is exported to file 'O:\ENGS128\lab3\lab3_sw_system\_ide\scripts\systemdebugger_lab3_sw_system_7_standalone.tcl'
+22:03:23 INFO  : Launching XSCT server: xsct.bat -n  -interactive O:\ENGS128\lab3\temp_xsdb_launch_script.tcl
+22:03:26 INFO  : XSCT server has started successfully.
+22:03:26 INFO  : plnx-install-location is set to ''
+22:03:26 INFO  : Successfully done setting XSCT server connection channel  
+22:03:26 INFO  : Successfully done setting workspace for the tool. 
+22:03:27 INFO  : Registering command handlers for Vitis TCF services
+22:03:27 ERROR : Error encountered while initializing user repository paths
+Reason: No Platforms Found.
+
+
+22:03:27 INFO  : Platform repository initialization has completed.
+22:03:28 INFO  : Successfully done query RDI_DATADIR 
+22:05:39 ERROR : Failed to update hardware specification for project 'axi_stream_bd_wrapper'.
+Reason: Failed to execute command 'platform config -updatehw {O:/ENGS128/lab3/axi_stream_bd_wrapper.xsa}'. Click on details for more information.
+22:07:09 ERROR : Failed to update hardware specification for project 'axi_stream_bd_wrapper'.
+Reason: Failed to execute command 'platform config -updatehw {O:/ENGS128/lab3/axi_stream_bd_wrapper.xsa}'. Click on details for more information.
+22:23:54 INFO  : Launching XSCT server: xsct.bat -n  -interactive O:\ENGS128\lab3\temp_xsdb_launch_script.tcl
+22:23:57 INFO  : XSCT server has started successfully.
+22:23:57 INFO  : Successfully done setting XSCT server connection channel  
+22:23:57 INFO  : plnx-install-location is set to ''
+22:23:57 INFO  : Successfully done setting workspace for the tool. 
+22:23:58 INFO  : Registering command handlers for Vitis TCF services
+22:23:58 ERROR : Error encountered while initializing user repository paths
+Reason: No Platforms Found.
+
+
+22:23:58 INFO  : Platform repository initialization has completed.
+22:23:59 INFO  : Successfully done query RDI_DATADIR 
+22:26:18 INFO  : Hardware specification for platform project 'axi_stream_bd_wrapper' is updated.
+22:27:39 INFO  : Result from executing command 'getProjects': axi_stream_bd_wrapper
+22:27:39 INFO  : Result from executing command 'getPlatforms': 
+22:27:40 INFO  : Checking for BSP changes to sync application flags for project 'lab3_sw'...
+22:27:52 INFO  : The hardware specification used by project 'lab3_sw' is out of sync with the platform. Resource files extracted from the hardware specification will be updated.
+22:27:52 INFO  : The file 'O:\ENGS128\lab3\lab3_sw\_ide\bitstream\axi_stream_bd_wrapper.bit' stored in project is removed.
+22:27:52 INFO  : The updated bitstream files are copied from platform to folder 'O:\ENGS128\lab3\lab3_sw\_ide\bitstream' in project 'lab3_sw'.
+22:27:52 INFO  : The file 'O:\ENGS128\lab3\lab3_sw\_ide\psinit\ps7_init.tcl' stored in project is removed.
+22:27:57 INFO  : The updated ps init files are copied from platform to folder 'O:\ENGS128\lab3\lab3_sw\_ide\psinit' in project 'lab3_sw'.
+22:29:30 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+22:29:31 INFO  : Jtag cable 'Digilent Zybo Z7 210351A6C805A' is selected.
+22:29:31 INFO  : 'jtag frequency' command is executed.
+22:29:31 INFO  : Context for 'APU' is selected.
+22:29:31 INFO  : System reset is completed.
+22:29:34 INFO  : 'after 3000' command is executed.
+22:29:34 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Zybo Z7 210351A6C805A" && level==0 && jtag_device_ctx=="jsn-Zybo Z7-210351A6C805A-13722093-0"}' command is executed.
+22:29:35 INFO  : Device configured successfully with "O:/ENGS128/lab3/lab3_sw/_ide/bitstream/axi_stream_bd_wrapper.bit"
+22:29:35 INFO  : Context for 'APU' is selected.
+22:29:35 INFO  : Hardware design and registers information is loaded from 'O:/ENGS128/lab3/axi_stream_bd_wrapper/export/axi_stream_bd_wrapper/hw/axi_stream_bd_wrapper.xsa'.
+22:29:35 INFO  : 'configparams force-mem-access 1' command is executed.
+22:29:36 INFO  : Context for 'APU' is selected.
+22:29:36 INFO  : Sourcing of 'O:/ENGS128/lab3/lab3_sw/_ide/psinit/ps7_init.tcl' is done.
+22:29:36 INFO  : 'ps7_init' command is executed.
+22:29:36 INFO  : 'ps7_post_config' command is executed.
+22:29:36 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+22:29:37 INFO  : The application 'O:/ENGS128/lab3/lab3_sw/Debug/lab3_sw.elf' is downloaded to processor 'ps7_cortexa9_0'.
+22:29:37 INFO  : 'configparams force-mem-access 0' command is executed.
+22:29:37 INFO  : ----------------XSDB Script----------------
+connect -url tcp:127.0.0.1:3121
+targets -set -nocase -filter {name =~"APU*"}
+rst -system
+after 3000
+targets -set -filter {jtag_cable_name =~ "Digilent Zybo Z7 210351A6C805A" && level==0 && jtag_device_ctx=="jsn-Zybo Z7-210351A6C805A-13722093-0"}
+fpga -file O:/ENGS128/lab3/lab3_sw/_ide/bitstream/axi_stream_bd_wrapper.bit
+targets -set -nocase -filter {name =~"APU*"}
+loadhw -hw O:/ENGS128/lab3/axi_stream_bd_wrapper/export/axi_stream_bd_wrapper/hw/axi_stream_bd_wrapper.xsa -mem-ranges [list {0x40000000 0xbfffffff}] -regs
+configparams force-mem-access 1
+targets -set -nocase -filter {name =~"APU*"}
+source O:/ENGS128/lab3/lab3_sw/_ide/psinit/ps7_init.tcl
+ps7_init
+ps7_post_config
+targets -set -nocase -filter {name =~ "*A9*#0"}
+dow O:/ENGS128/lab3/lab3_sw/Debug/lab3_sw.elf
+configparams force-mem-access 0
+----------------End of Script----------------
+
+22:29:37 INFO  : Context for processor 'ps7_cortexa9_0' is selected.
+22:29:37 INFO  : 'con' command is executed.
+22:29:37 INFO  : ----------------XSDB Script (After Launch)----------------
+targets -set -nocase -filter {name =~ "*A9*#0"}
+con
+----------------End of Script----------------
+
+22:29:37 INFO  : Launch script is exported to file 'O:\ENGS128\lab3\lab3_sw_system\_ide\scripts\systemdebugger_lab3_sw_system_8_standalone.tcl'
+22:47:02 INFO  : Disconnected from the channel tcfchan#3.

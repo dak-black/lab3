@@ -167,10 +167,18 @@ datapath : process (s00_axis_aclk)
 begin
 	if (rising_edge(s00_axis_aclk)) then
 		if (curr_state = LReceive) then
-            left_audio_data_o <= s00_axis_tdata(FIFO_WIDTH-1 downto FIFO_WIDTH - DATA_WIDTH);
+            if (s00_axis_tdata(0) = '0') then
+                left_audio_data_o <= s00_axis_tdata(FIFO_WIDTH-1 downto FIFO_WIDTH - DATA_WIDTH);
+            else
+                right_audio_data_o <= s00_axis_tdata(FIFO_WIDTH-1 downto FIFO_WIDTH - DATA_WIDTH);
+            end if;
             
         elsif (curr_state = RReceive) then
-            right_audio_data_o <= s00_axis_tdata(FIFO_WIDTH-1 downto FIFO_WIDTH - DATA_WIDTH);
+            if (s00_axis_tdata(0) = '1') then
+                right_audio_data_o <= s00_axis_tdata(FIFO_WIDTH-1 downto FIFO_WIDTH - DATA_WIDTH);
+            else
+                left_audio_data_o <= s00_axis_tdata(FIFO_WIDTH-1 downto FIFO_WIDTH - DATA_WIDTH);
+            end if;
         end if;
 	end if;
 end process datapath;

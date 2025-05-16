@@ -166,8 +166,8 @@ end process datapath;
 dFF : process(m00_axis_aclk)
 begin
     if (rising_edge(m00_axis_aclk)) then
-        Ltemp1 <= left_audio_data_i & (FIFO_WIDTH-DATA_WIDTH downto 1 => '0');
-        Rtemp1 <= right_audio_data_i & (FIFO_WIDTH-DATA_WIDTH downto 1 => '0');
+        Ltemp1 <= left_audio_data_i & (FIFO_WIDTH-DATA_WIDTH downto 2 => '0') & '0';
+        Rtemp1 <= right_audio_data_i & (FIFO_WIDTH-DATA_WIDTH downto 2 => '0') & '1';
         lrclk_temp1 <= lrclk_i;
                 
         Ltemp2 <= Ltemp1;

@@ -36,11 +36,17 @@ set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_
 # IP: bd/axi_stream_bd/ip/axi_stream_bd_xbar_1/axi_stream_bd_xbar_1.xci
 set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_xbar_1 || ORIG_REF_NAME==axi_stream_bd_xbar_1} -quiet] -quiet
 
+# IP: bd/axi_stream_bd/ip/axi_stream_bd_auto_pc_0_1/axi_stream_bd_auto_pc_0.xci
+set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_auto_pc_0 || ORIG_REF_NAME==axi_stream_bd_auto_pc_0} -quiet] -quiet
+
 # IP: bd/axi_stream_bd/ip/axi_stream_bd_axi_interconnect_0_1/axi_stream_bd_axi_interconnect_0_1.xci
 set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_axi_interconnect_0_1 || ORIG_REF_NAME==axi_stream_bd_axi_interconnect_0_1} -quiet] -quiet
 
 # IP: bd/axi_stream_bd/ip/axi_stream_bd_rst_ps7_0_125M_0/axi_stream_bd_rst_ps7_0_125M_0.xci
 set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_rst_ps7_0_125M_0 || ORIG_REF_NAME==axi_stream_bd_rst_ps7_0_125M_0} -quiet] -quiet
+
+# IP: bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/axi_stream_bd_system_ila_0_0.xci
+set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_system_ila_0_0 || ORIG_REF_NAME==axi_stream_bd_system_ila_0_0} -quiet] -quiet
 
 # IP: bd/axi_stream_bd/ip/axi_stream_bd_axis_i2s_wrapper_0_0/axi_stream_bd_axis_i2s_wrapper_0_0.xci
 set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_axis_i2s_wrapper_0_0 || ORIG_REF_NAME==axi_stream_bd_axis_i2s_wrapper_0_0} -quiet] -quiet
@@ -62,12 +68,6 @@ set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_
 
 # IP: ip/fir_lpf_0_1/fir_lpf_0.xci
 #dup# set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==fir_lpf_0 || ORIG_REF_NAME==fir_lpf_0} -quiet] -quiet
-
-# IP: bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/axi_stream_bd_system_ila_0_0.xci
-set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_system_ila_0_0 || ORIG_REF_NAME==axi_stream_bd_system_ila_0_0} -quiet] -quiet
-
-# IP: bd/axi_stream_bd/ip/axi_stream_bd_auto_pc_0_1/axi_stream_bd_auto_pc_0.xci
-set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==axi_stream_bd_auto_pc_0 || ORIG_REF_NAME==axi_stream_bd_auto_pc_0} -quiet] -quiet
 
 # XDC: o:/ENGS128/lab3/lab3.gen/sources_1/ip/blk_mem_gen_0/blk_mem_gen_0_ooc.xdc
 

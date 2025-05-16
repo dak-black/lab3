@@ -1,10 +1,10 @@
 ----------------------------------------------------------------------------
---  Lab 2: AXI I2S Wrapper
+--  Lab 3: Digital Signal Processing - AXI I2S Wrapper
 ----------------------------------------------------------------------------
 --  ENGS 128 Spring 2025
 --	Author: James Quirk and Dak Black
 ----------------------------------------------------------------------------
---	Description: Wrapper that presents the I2S interfaces in the more universal AXI convention
+--	Description: Updated I2S Wrapper for Lab 3, employing the AXI DDS
 ----------------------------------------------------------------------------
 -- Add libraries 
 library IEEE;
@@ -194,23 +194,8 @@ component i2s_transmitter is
 		dac_serial_data_o     : out std_logic);  
 end component; 
 
-
 ----------------------------------------------------------------------------------
----- DDS audio tone generator
---component dds_controller is
---    Generic ( DDS_DATA_WIDTH : integer := AC_DATA_WIDTH;       -- DDS data width
---            PHASE_DATA_WIDTH : integer := PHASE_DATA_WIDTH);      -- DDS phase increment data width
---    Port ( 
---      clk_i         : in std_logic;
---      enable_i      : in std_logic;
---      reset_i       : in std_logic;
---      phase_inc_i   : in std_logic_vector(PHASE_DATA_WIDTH-1 downto 0);
-      
---      data_o        : out std_logic_vector(DDS_DATA_WIDTH-1 downto 0)); 
---end component;
-
-----------------------------------------------------------------------------------
--- AXI DDS
+-- NEW: AXI DDS added for Lab 3 to enable AXI-Lite compatible signal provision
 component axi_dds is
 	generic (
 	    ----------------------------------------------------------------------------
@@ -344,7 +329,7 @@ receiver: i2s_receiver
 		mclk_i                => mclk,
         bclk_i                => bclk,	
 		lrclk_i               => lrclk,
-		left_audio_data_o     => left_rx,
+		left_audio_data_o     => left_rx, -- New output signal that can be muxed with DDS output depending on mode
 		right_audio_data_o    => right_rx,
 		adc_serial_data_i     => ac_adc_data_i); -- CHANGED TO CUT OFF RECIEVER (easier than switching others)
 	
@@ -397,7 +382,7 @@ port map(
     mclk_i              => mclk,
     bclk_i              => bclk,
     lrclk_i             => lrclk,
-    left_audio_data_i   => left_tx_data,		-- REMEMBER: CHANGE BACK TO LEFT_AUDIO_DATA_TX
+    left_audio_data_i   => left_tx_data,		
     right_audio_data_i  => right_tx_data,
     dac_serial_data_o   => ac_dac_data_o);		-- DUT output
 
@@ -450,16 +435,9 @@ lrclk_o <= lrclk;
 ---------------------------------------------------------------------------- 
 -- Logic
 ---------------------------------------------------------------------------- 
--- sets the low-active mute signal
---pass_mute: process(mclk)
---begin
---    if (rising_edge(mclk)) then
---        ac_mute_n_o <= not(ac_mute_en_i);
---    end if;
---end process pass_mute;
+ac_mute_n_o <= '1'; -- Fix mute_n as high so as never to mute
 
-ac_mute_n_o <= '1';
-
+-- Determines whether to output the DDS or I2S receiver data
 dds_codec_swap: process(sysclk_i)
 begin
     if (falling_edge(sysclk_i)) then

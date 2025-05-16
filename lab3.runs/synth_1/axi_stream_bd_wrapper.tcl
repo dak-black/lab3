@@ -70,14 +70,6 @@ proc create_report { reportName command } {
   }
 }
 OPTRACE "synth_1" START { ROLLUP_AUTO }
-set_param tcl.collectionResultDisplayLimit 0
-set_param checkpoint.writeSynthRtdsInDcp 1
-set_param chipscope.maxJobs 4
-set_param synth.incrementalSynthesisCache C:/Users/F004pfj/AppData/Local/Temp/.Xil_F004pfj/Vivado-16488-m210-17/incrSyn
-set_param xicom.use_bs_reader 1
-set_msg_config -id {Common 17-41} -limit 10000000
-set_msg_config -id {Synth 8-256} -limit 10000
-set_msg_config -id {Synth 8-638} -limit 10000
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7z010clg400-1
 
@@ -95,7 +87,6 @@ set_property ip_output_repo o:/ENGS128/lab3/lab3.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
-add_files O:/ENGS128/week4-axi-dds-audio/filter_coe/lpf_fir.coe
 add_files O:/ENGS128/lab3/lab3.srcs/filter_coe/bpf_fir.coe
 add_files O:/ENGS128/lab3/lab3.srcs/filter_coe/bsf_fir.coe
 add_files O:/ENGS128/lab3/lab3.srcs/filter_coe/hpf_fir.coe
@@ -107,18 +98,18 @@ set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.g
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_axi_iic_0_0/axi_stream_bd_axi_iic_0_0_board.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_axi_iic_0_0/axi_stream_bd_axi_iic_0_0_ooc.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_xbar_1/axi_stream_bd_xbar_1_ooc.xdc]
+set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_auto_pc_0/axi_stream_bd_auto_pc_0_ooc.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_rst_ps7_0_125M_0/axi_stream_bd_rst_ps7_0_125M_0_board.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_rst_ps7_0_125M_0/axi_stream_bd_rst_ps7_0_125M_0.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_rst_ps7_0_125M_0/axi_stream_bd_rst_ps7_0_125M_0_ooc.xdc]
-set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_axis_i2s_wrapper_0_0/axi_stream_bd_axis_i2s_wrapper_0_0_ooc.xdc]
-set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_axis_fir_0_0/axi_stream_bd_axis_fir_0_0_ooc.xdc]
 set_property used_in_synthesis false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/bd_0/ip/ip_0/ila_v6_2/constraints/ila_impl.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/bd_0/ip/ip_0/ila_v6_2/constraints/ila_impl.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/bd_0/ip/ip_0/ila_v6_2/constraints/ila.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/bd_0/ip/ip_0/bd_5de7_ila_lib_0_ooc.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/bd_0/bd_5de7_ooc.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_system_ila_0_0/axi_stream_bd_system_ila_0_0_ooc.xdc]
-set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_auto_pc_0/axi_stream_bd_auto_pc_0_ooc.xdc]
+set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_axis_i2s_wrapper_0_0/axi_stream_bd_axis_i2s_wrapper_0_0_ooc.xdc]
+set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/ip/axi_stream_bd_axis_fir_0_0/axi_stream_bd_axis_fir_0_0_ooc.xdc]
 set_property used_in_implementation false [get_files -all o:/ENGS128/lab3/lab3.gen/sources_1/bd/axi_stream_bd/axi_stream_bd_ooc.xdc]
 
 OPTRACE "Adding files" END { }

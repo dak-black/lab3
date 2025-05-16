@@ -1,6 +1,5 @@
 ----------------------------------------------------------------------------
---  Lab 1: DDS and the Audio Codec
---  Week 3 - AXI Lite Demo
+--  Lab 3: Digital Signal Processing: AXI DDS
 ----------------------------------------------------------------------------
 --  ENGS 128 Spring 2025
 --	Author: Kendall Farnham
@@ -195,7 +194,7 @@ begin
 	-- Add user logic here
     ----------------------------------------------------------------------------    
     -- Connect signals to ports
-    left_dds_phase_incr <= left_phase_incr_axi_data(DDS_PHASE_DATA_WIDTH-1 downto 0); -- take LSBs COMMENT BACK IN WHEN GENERATING BITSTREAM
+    left_dds_phase_incr <= left_phase_incr_axi_data(DDS_PHASE_DATA_WIDTH-1 downto 0);
     right_dds_phase_incr <= right_phase_incr_axi_data(DDS_PHASE_DATA_WIDTH-1 downto 0); -- take LSBs
 
 --    left_dds_phase_incr <= std_logic_vector(to_unsigned(30, DDS_PHASE_DATA_WIDTH));
