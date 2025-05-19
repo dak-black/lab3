@@ -1,5 +1,4 @@
 **FOR GRADING:**
-
 To find the corresponding files, use the following paths:
 
 *Updated Lab 1 and 2 files:*
